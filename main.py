@@ -19,7 +19,7 @@ G.add_nodes_from(item_nodes)
 g = []
 h = []
 f = []
-# todo:Change to continuous Factors and code the formulae in the paper
+
 for node in user_nodes:
     g.append(DiscreteFactor([node], [2], np.ones(2)))
 
@@ -52,3 +52,9 @@ for i in range(len(f)):
 
 
 
+# Rating matrix
+R = [[3, 4, 5],
+     [4, 3, 5],
+     [2, 5, 4]]
+
+#todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
