@@ -1,40 +1,52 @@
 from __future__ import print_function
 
 import numpy as np
-import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
 
-# Read data in
-print('Reading data...')
-data = pd.read_csv('Data/ratings.csv')
-print('Done!!')
+#Example User-Item Matrix
 
-print(data.values)
-#print(data[1])
-#print(data[2])
 
-print('Building Fac Graph...')
+# Initialize Factor Graph
 G = FactorGraph()
 
 
 # Data Statistics
-
 num_users = 700
-num_targets = 9000
+num_items = 9000
 
-# Create nodes
-user_nodes = ['u1', 'u2', 'u3']
-item_nodes = ['t1', 't2', 't3']
-#node_list = ['u1', 'u2', 'u3', 't1', 't2', 't3']
+
+# Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
+user_nodes = []
+for i in range(1,num_users+1):
+    user_nodes.append('m' + str(i))
+
+item_nodes = []
+for i in range(1,num_items+1):
+    item_nodes.append('t' + str(i))
+
+
+# Spam Users and Target Items Initializations
+m = np.random.rand(num_users)
+m = [1  if i>0.5  else 0 for i in m]
+
+t = np.random.rand(num_items)
+t = [1  if i>0.5  else 0 for i in t]
+
+
+# Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
 G.add_nodes_from(item_nodes)
+
 
 #Create Factors
 g = []
 h = []
 f = []
+
+
+
 
 for node in user_nodes:
     g.append(DiscreteFactor([node], [2], np.ones(2)))
@@ -66,7 +78,7 @@ for i in range(len(f)):
     for j in range(len(user_nodes)):
         G.add_edge(f[i], user_nodes[j])
 
-print('Done')
+
 
 # Rating matrix
 R = [[3, 4, 5],
