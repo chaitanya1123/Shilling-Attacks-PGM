@@ -1,10 +1,19 @@
 from __future__ import print_function
 
 import numpy as np
+import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
-#Example User-Item Matrix
+
+# Read data in 
+
+
+
+
+
+
+
 
 G = FactorGraph()
 
