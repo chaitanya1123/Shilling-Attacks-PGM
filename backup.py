@@ -8,12 +8,6 @@ from pgmpy.factors.discrete import DiscreteFactor
 
 G = FactorGraph()
 
-
-# Data Statistics
-
-num_users = 700
-num_targets = 9000
-
 # Create nodes
 user_nodes = ['u1', 'u2', 'u3']
 item_nodes = ['t1', 't2', 't3']

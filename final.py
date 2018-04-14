@@ -10,13 +10,19 @@ G = FactorGraph()
 
 
 # Data Statistics
-
 num_users = 700
 num_targets = 9000
 
 # Create nodes
-user_nodes = ['u1', 'u2', 'u3']
-item_nodes = ['t1', 't2', 't3']
+user_nodes = []
+for i in range(1,11):
+    user_nodes.append('u' + str(i))
+
+item_nodes = []
+for i in range(1,11):
+    item_nodes.append('i' + str(i))
+
+
 #node_list = ['u1', 'u2', 'u3', 't1', 't2', 't3']
 G.add_nodes_from(user_nodes)
 G.add_nodes_from(item_nodes)
