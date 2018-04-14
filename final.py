@@ -6,6 +6,11 @@ from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
 
 #Example User-Item Matrix
+data = pd.read_csv('Data/ratings.csv')
+
+
+#print(data[1])
+#print(data[2])
 
 
 # Initialize Factor Graph
@@ -38,6 +43,20 @@ t = [1  if i>0.5  else 0 for i in t]
 # Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
 G.add_nodes_from(item_nodes)
+
+
+# Item Rating Bias
+min_rating = 1;
+max_rating = 5;
+
+r_item_bias = []
+
+for item in range(0,num_items):
+    item_ratings = R[:,item]
+    m_i = (item_ratings == max_rating)
+    r_i = ((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i))
+    r_item_bias.append(((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i)))
+
 
 
 #Create Factors
