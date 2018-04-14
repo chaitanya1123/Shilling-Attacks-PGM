@@ -58,3 +58,4 @@ R = [[3, 4, 5],
      [2, 5, 4]]
 
 #todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
+#Changes to Sampada branch
