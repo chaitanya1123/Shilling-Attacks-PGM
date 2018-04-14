@@ -4,33 +4,49 @@ import numpy as np
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
+
 #Example User-Item Matrix
 
+
+# Initialize Factor Graph
 G = FactorGraph()
 
 
 # Data Statistics
 num_users = 700
-num_targets = 9000
+num_items = 9000
 
-# Create nodes
+
+# Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
 user_nodes = []
-for i in range(1,11):
-    user_nodes.append('u' + str(i))
+for i in range(1,num_users+1):
+    user_nodes.append('m' + str(i))
 
 item_nodes = []
-for i in range(1,11):
-    item_nodes.append('i' + str(i))
+for i in range(1,num_items+1):
+    item_nodes.append('t' + str(i))
 
 
-#node_list = ['u1', 'u2', 'u3', 't1', 't2', 't3']
+# Spam Users and Target Items Initializations
+m = np.random.rand(num_users)
+m = [1  if i>0.5  else 0 for i in m]
+
+t = np.random.rand(num_items)
+t = [1  if i>0.5  else 0 for i in t]
+
+
+# Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
 G.add_nodes_from(item_nodes)
+
 
 #Create Factors
 g = []
 h = []
 f = []
+
+
+
 
 for node in user_nodes:
     g.append(DiscreteFactor([node], [2], np.ones(2)))
