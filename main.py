@@ -6,15 +6,16 @@ import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
 
-# Read data in 
+# Read data in
+print('Reading data...')
+data = pd.read_csv('Data/ratings.csv')
+print('Done!!')
 
+print(data.values)
+#print(data[1])
+#print(data[2])
 
-
-
-
-
-
-
+print('Building Fac Graph...')
 G = FactorGraph()
 
 # Create nodes
@@ -59,7 +60,7 @@ for i in range(len(f)):
     for j in range(len(user_nodes)):
         G.add_edge(f[i], user_nodes[j])
 
-
+print('Done')
 
 # Rating matrix
 R = [[3, 4, 5],
