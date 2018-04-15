@@ -65,6 +65,17 @@ for i in range(len(f)):
 
 print('Done')
 
+<<<<<<< HEAD
+=======
+# Rating matrix
+R = np.matrix([[3, 4, 5],
+              [4, 3, 5],
+              [2, 5, 4]])
+
+
+num_users = R.shape[0]
+num_items = R.shape[1]
+>>>>>>> 5434038556c29b64a797e8a924dcdcac59067167
 
 num_users = np.shape(R)[0]
 num_items = np.shape(R)[1]
@@ -86,6 +97,7 @@ def meetsCondition(u,element):
 ##feature (MeanVar) phi_u for every user u
 
 
+<<<<<<< HEAD
 phi_u_all = []
 print("Calculating phi_u for all the users")
 for u in range(num_users):
@@ -106,3 +118,6 @@ print(len(phi_u_all))
 print("Finished calculating phi for all the users")
 #todo: 1) Change discrete factors to continuous factors!
 
+=======
+#todo: 1) Change discrete factors to continuous factors! 
+>>>>>>> 5434038556c29b64a797e8a924dcdcac59067167
