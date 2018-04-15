@@ -1,30 +1,25 @@
 from __future__ import print_function
 from __future__ import division
-
-
+import sys
 import numpy as np
 import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
+from data import build_movies_dict, generate_matrix
 
-# Read data in
-print('Reading data...')
-data = pd.read_csv('Data/ratings.csv')
-print('Done!!')
 
-print(data.values)
-#print(data[1])
-#print(data[2])
+# Set paths
+movies_data = 'Data/movies.csv'
+ratings_data = 'Data/ratings.csv'
 
+#Generate user-item rating matrix
+movies_dict = build_movies_dict(movies_data)
+R = generate_matrix(ratings_data, movies_dict)
 print('Building Fac Graph...')
 G = FactorGraph()
 
 
-# Data Statistics
-
-num_users = 700
-num_targets = 9000
 
 # Create nodes
 user_nodes = ['u1', 'u2', 'u3']
@@ -46,7 +41,7 @@ for node in item_nodes:
 
 for user in user_nodes:
     for item in item_nodes:
-        f.append(DiscreteFactor([user,item], [2,2], np.ones([2,2])))
+        f.append(DiscreteFactor([user, item], [2, 2], np.ones([2,2])))
 
 #Add factors to graph
 for factor in g:
@@ -70,15 +65,9 @@ for i in range(len(f)):
 
 print('Done')
 
-# Rating matrix
-R = np.matrix([[3, 4, 5],
-              [4, 3, 5],
-              [2, 5, 4]])
 
-
-num_users = R.shape[0]
-num_items = R.shape[1]
-
+num_users = np.shape(R)[0]
+num_items = np.shape(R)[1]
 
 ##rui (user u's rating on item i)
 def r_u_i(u,i):
@@ -88,24 +77,32 @@ def r_u_i(u,i):
 ##ri (average rating of item i)
 def r_i_dash(i):
     avg_rating = np.sum(R,axis=0)/num_users
-    return avg_rating[0,i]
+    return avg_rating[i]
+
+
+def meetsCondition(u,element):
+    return bool(R[u,element] !=0 and R[u,element] != 5)
 
 ##feature (MeanVar) phi_u for every user u
-def phi_u(u):
-    sum =0
-    count=0
-    for items in range(num_items):
-        if(R[u,items]!=5):
-            count = count+1
-            sum = sum+((R[u,items] - r_i_dash(items))**2)
-
-    sum=sum/count
-    return sum
-
-#print feature MeanVar of 0th user
-print(phi_u(0))
 
 
+phi_u_all = []
+print("Calculating phi_u for all the users")
+for u in range(num_users):
+    avg_rating = np.sum(R, axis=0) / num_users
 
+    #Iu\Iu_bar
+    u_ratings=[R[u,items] for items in range(num_items) if meetsCondition(u,items)]
 
+    avg_subset_u = [avg_rating[element] for element in range(num_items) if meetsCondition(u,element)]
+    #print(u_ratings)
+    # #print(avg_subset_u)
+    phi_u_arr = [(a_i - b_i)**2 for a_i, b_i in zip(u_ratings,avg_subset_u)]
+    phi_u = sum(phi_u_arr)/len(phi_u_arr)
+    phi_u_all.append(phi_u)
+
+print(phi_u_all)
+print(len(phi_u_all))
+print("Finished calculating phi for all the users")
+#todo: 1) Change discrete factors to continuous factors!
 
