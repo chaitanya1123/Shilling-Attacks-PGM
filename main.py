@@ -5,12 +5,16 @@ import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
-
-# Read data in
-# data = pd.read_csv('Data/ratings.csv').drop(u'timestamp', 1)
-# print(data.columns[1:])
+from data import build_movies_dict, generate_matrix
 
 
+# Set paths
+movies_data = 'Data/movies.csv'
+ratings_data = 'Data/ratings.csv'
+
+#Generate user-item rating matrix
+movies_dict = build_movies_dict(movies_data)
+R = generate_matrix(ratings_data, movies_data)
 
 print('Building Fac Graph...')
 G = FactorGraph()
@@ -65,13 +69,4 @@ for i in range(len(f)):
 
 print('Done')
 
-# Rating matrix
-R = [[3, 4, 5],
-     [4, 3, 5],
-     [2, 5, 4]]
-
 #todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
-<<<<<<< HEAD
-#Changes to Sampada branch
-=======
->>>>>>> c7c6db9b3a95c026a9514b8032f15f20e8fb1184

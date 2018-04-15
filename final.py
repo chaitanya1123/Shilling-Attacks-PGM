@@ -9,13 +9,8 @@ from pgmpy.factors.discrete import DiscreteFactor
 data = pd.read_csv('Data/ratings.csv')
 
 
-#print(data[1])
-#print(data[2])
-
-
 # Initialize Factor Graph
 G = FactorGraph()
-
 
 # Data Statistics
 num_users = 700
@@ -56,6 +51,53 @@ for item in range(0,num_items):
     m_i = (item_ratings == max_rating)
     r_i = ((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i))
     r_item_bias.append(((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i)))
+
+
+
+# Factor (f) over each Item
+alpha_t = -0.1
+del_r = 0.1
+
+f = []
+
+for item in range(0,num_items):
+    f_i = 1/(1 + np.exp(np.power(-1,1-t[item])*alpha_t*(r_item_bias[item] - del_r)))
+    f.append(f_i)
+
+
+# Factor (h) over each Item
+phi = np.var(R,axis = 0)
+beta_2 = 0.1
+tau_2 = 0.1
+
+h = []
+
+for item in range(0,num_items):
+    h_i = 1/(1 + np.exp(np.power(-1,1 - t[item])*beta_2*(phi[item]-tau_2)))
+    h.append(h_i)
+
+
+
+# Phi for Every User
+phi = []
+average_item = np.average(R,axis = 0)
+
+for user in range(0,num_users):
+    ratings_u = R[user,:]
+    I_non_max_u = ratings_u[ratings_u<max_rating]
+    phi_u = sum(np.power(ratings_u[I_non_max_u] - average_item[I_non_max_u],2))/(sum(I_non_max_u))
+    phi.append(phi_u)
+    
+
+# Factor (g) over Each User
+beta_1 = 0.1
+tau_1 = 0.1
+
+g = []
+
+for user in range(0,num_users):
+    g_u = 1/(91 + np.exp(np.power(-1,1-m[user])*beta_1*(phi[user] - tau_1)))
+    g.append(g_u)
 
 
 
