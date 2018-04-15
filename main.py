@@ -1,21 +1,21 @@
 from __future__ import print_function
 from __future__ import division
-
-
+import sys
 import numpy as np
 import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
+from data import build_movies_dict, generate_matrix
 
-# Read data in
-print('Reading data...')
-data = pd.read_csv('Data/ratings.csv')
-print('Done!!')
 
-print(data.values)
-#print(data[1])
-#print(data[2])
+# Set paths
+movies_data = 'Data/movies.csv'
+ratings_data = 'Data/ratings.csv'
+
+#Generate user-item rating matrix
+movies_dict = build_movies_dict(movies_data)
+R = generate_matrix(ratings_data, movies_data)
 
 print('Building Fac Graph...')
 G = FactorGraph()
@@ -46,7 +46,7 @@ for node in item_nodes:
 
 for user in user_nodes:
     for item in item_nodes:
-        f.append(DiscreteFactor([user,item], [2,2], np.ones([2,2])))
+        f.append(DiscreteFactor([user, item], [2, 2], np.ones([2,2])))
 
 #Add factors to graph
 for factor in g:
@@ -105,7 +105,4 @@ def phi_u(u):
 #print feature MeanVar of 0th user
 print(phi_u(0))
 
-
-
-
-
+#todo: 1) Change discrete factors to continuous factors! 
