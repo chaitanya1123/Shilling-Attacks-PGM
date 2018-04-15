@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 import sys
 import numpy as np
 import pandas as pd
@@ -69,4 +70,43 @@ for i in range(len(f)):
 
 print('Done')
 
+<<<<<<< HEAD
 #todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
+=======
+# Rating matrix
+R = np.matrix([[3, 4, 5],
+              [4, 3, 5],
+              [2, 5, 4]])
+
+
+num_users = R.shape[0]
+num_items = R.shape[1]
+
+
+##rui (user u's rating on item i)
+def r_u_i(u,i):
+    return R[u,i]
+
+
+##ri (average rating of item i)
+def r_i_dash(i):
+    avg_rating = np.sum(R,axis=0)/num_users
+    return avg_rating[0,i]
+
+##feature (MeanVar) phi_u for every user u
+def phi_u(u):
+    sum =0
+    count=0
+    for items in range(num_items):
+        if(R[u,items]!=5):
+            count = count+1
+            sum = sum+((R[u,items] - r_i_dash(items))**2)
+
+    sum=sum/count
+    return sum
+
+#print feature MeanVar of 0th user
+print(phi_u(0))
+
+#todo: 1) Change discrete factors to continuous factors! 
+>>>>>>> master
