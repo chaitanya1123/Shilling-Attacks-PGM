@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import sys
 import numpy as np
 import pandas as pd
 import pgmpy
@@ -7,13 +7,10 @@ from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
 
 # Read data in
-print('Reading data...')
-data = pd.read_csv('Data/ratings.csv')
-print('Done!!')
+# data = pd.read_csv('Data/ratings.csv').drop(u'timestamp', 1)
+# print(data.columns[1:])
 
-print(data.values)
-#print(data[1])
-#print(data[2])
+
 
 print('Building Fac Graph...')
 G = FactorGraph()
@@ -44,7 +41,7 @@ for node in item_nodes:
 
 for user in user_nodes:
     for item in item_nodes:
-        f.append(DiscreteFactor([user,item], [2,2], np.ones([2,2])))
+        f.append(DiscreteFactor([user, item], [2, 2], np.ones([2,2])))
 
 #Add factors to graph
 for factor in g:
