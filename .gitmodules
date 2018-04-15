@@ -1,0 +1,3 @@
+[submodule "SDLib"]
+	path = SDLib
+	url = https://github.com/Coder-Yu/SDLib
