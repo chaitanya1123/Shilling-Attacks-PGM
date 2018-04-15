@@ -14,8 +14,8 @@ ratings_data = 'Data/ratings.csv'
 
 #Generate user-item rating matrix
 movies_dict = build_movies_dict(movies_data)
-R = generate_matrix(ratings_data, movies_data)
-
+R = generate_matrix(ratings_data, movies_dict)
+sys.exit(1)
 print('Building Fac Graph...')
 G = FactorGraph()
 
