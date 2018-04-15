@@ -17,7 +17,7 @@ beta_1 = -1
 tau_1 = 0.5
 beta_2 = 1
 tau_2 = 1.5
-
+small = 1e-9
 
 # User-item rating matrix
 movies_dict = build_movies_dict(movies_data)
@@ -67,8 +67,8 @@ for i in range(num_items):
     r_ui = [R[u, i] for u in range(num_users) if R[u,i] != 0]
     m_i = [m[u] for u in range(num_users) if R[u,i] == 5]
 
-    first = sum(r_ui)/(len(r_ui) + 1e-9)
-    second = (sum(r_ui) - max_rating * sum(m_i)) / (len(r_ui) - sum(m_i) + 1e-9)
+    first = sum(r_ui)/(len(r_ui) + small)
+    second = (sum(r_ui) - max_rating * sum(m_i)) / (len(r_ui) - sum(m_i) + small)
 
     rating_bias.append(np.abs(first - second))
 
