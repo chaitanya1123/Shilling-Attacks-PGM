@@ -78,9 +78,26 @@ for item in range(0,num_items):
 
 
 
+# Phi for Every User
+phi = []
+average_item = np.average(R,axis = 0)
 
+for user in range(0,num_users):
+    ratings_u = R[user,:]
+    I_non_max_u = ratings_u[ratings_u<max_rating]
+    phi_u = sum(np.power(ratings_u[I_non_max_u] - average_item[I_non_max_u],2))/(sum(I_non_max_u))
+    phi.append(phi_u)
+    
 
+# Factor (g) over Each User
+beta_1 = 0.1
+tau_1 = 0.1
 
+g = []
+
+for user in range(0,num_users):
+    g_u = 1/(91 + np.exp(np.power(-1,1-m[user])*beta_1*(phi[user] - tau_1)))
+    g.append(g_u)
 
 
 
