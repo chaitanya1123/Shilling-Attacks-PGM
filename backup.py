@@ -1,29 +1,12 @@
 from __future__ import print_function
-import sys
+
 import numpy as np
-import pandas as pd
 import pgmpy
 from pgmpy.models import FactorGraph
 from pgmpy.factors.discrete import DiscreteFactor
-from data import build_movies_dict, generate_matrix
+#Example User-Item Matrix
 
-
-# Set paths
-movies_data = 'Data/movies.csv'
-ratings_data = 'Data/ratings.csv'
-
-#Generate user-item rating matrix
-movies_dict = build_movies_dict(movies_data)
-R = generate_matrix(ratings_data, movies_data)
-
-print('Building Fac Graph...')
 G = FactorGraph()
-
-
-# Data Statistics
-
-num_users = 700
-num_targets = 9000
 
 # Create nodes
 user_nodes = ['u1', 'u2', 'u3']
@@ -45,7 +28,7 @@ for node in item_nodes:
 
 for user in user_nodes:
     for item in item_nodes:
-        f.append(DiscreteFactor([user, item], [2, 2], np.ones([2,2])))
+        f.append(DiscreteFactor([user,item], [2,2], np.ones([2,2])))
 
 #Add factors to graph
 for factor in g:
@@ -67,6 +50,11 @@ for i in range(len(f)):
     for j in range(len(user_nodes)):
         G.add_edge(f[i], user_nodes[j])
 
-print('Done')
+
+
+# Rating matrix
+R = [[3, 4, 5],
+     [4, 3, 5],
+     [2, 5, 4]]
 
 #todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
