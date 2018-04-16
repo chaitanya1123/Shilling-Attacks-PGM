@@ -20,6 +20,7 @@ beta_2 = 1
 tau_2 = 1.5
 min_rating = 1
 max_rating = 5
+small = 1e-9
 
 # User-item rating matrix
 movies_dict = build_movies_dict(movies_data)
