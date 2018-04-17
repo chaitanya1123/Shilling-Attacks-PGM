@@ -35,23 +35,33 @@ print('Initializing...')
 # Initialize Factor Graph
 G = FactorGraph()
 
+# todo: Not sure about the node generation. If we pass 'm1' 'm2' then how do we feed in values to these nodes
+
 # Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
-# user_nodes = []
-# for i in range(1, num_users+1):
-#     user_nodes.append('m' + str(i))
-#
-# item_nodes = []
-# for i in range(1, num_items+1):
-#     item_nodes.append('t' + str(i))
+user_nodes = []
+for i in range(1, num_users+1):
+    user_nodes.append('m' + str(i))
+
+item_nodes = []
+for i in range(1, num_items+1):
+    item_nodes.append('t' + str(i))
 
 # Spam Users and Target Items Initializations
 m = np.random.rand(num_users)
 m = [1 if i > 0.5 else 0 for i in np.random.rand(num_users)]
-user_nodes = m
+# user_nodes = m
 
 t = np.random.rand(num_items)
 t = [1 if i > 0.5 else 0 for i in np.random.rand(num_items)]
-item_nodes = t
+# item_nodes = t
+
+# Dict to map nosed to their values
+user_dict = {}
+item_dict = {}
+
+for user in 
+
+
 
 # Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
@@ -112,13 +122,21 @@ def f_pdf(item_node, iid):
 def h_pdf(item_node, iid):
     return almost_sigmoid(item_node, alpha_t, rating_bias[iid], delta_r)
 
+# todo: figure out how to get the pdfs of the factors in to the model
+
+temp = g_pdf(1, 0)
+
+print(type(temp))
+
+sys.exit(0)
+
 # Create Factors
 for uid, user_node in enumerate(user_nodes):
     print(uid, user_node)
-    g.append(ContinuousFactor([user_node], pdf=g_pdf(user_node, uid)))
+    g.append(ContinuousFactor(variables=[user_node], pdf=g_pdf(user_node, uid)))
 
 for iid, item_node in enumerate(item_nodes):
-    h.append(ContinuousFactor([item_node], pdf=h_pdf(item_node, iid)))
+    h.append(ContinuousFactor(variables=[item_node], pdf=h_pdf(item_node, iid)))
 
 for uid, user_node in enumerate(user_nodes):
     for iid, item_node in enumerate(item_nodes):
@@ -135,7 +153,7 @@ G.add_factors(g[0])
 # for factor in f:
     # G.add_factors(factor)
 
-sys.exit(0)
+
 
 print('Adding edges...')
 
