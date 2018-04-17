@@ -16,6 +16,10 @@ ratings_data = 'Data/ratings.csv'
 #Generate user-item rating matrix
 movies_dict = build_movies_dict(movies_data)
 R = generate_matrix(ratings_data, movies_dict)
+<<<<<<< HEAD
+=======
+sys.exit(1)
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
 print('Building Fac Graph...')
 G = FactorGraph()
 
@@ -65,6 +69,20 @@ for i in range(len(f)):
 
 print('Done')
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
+=======
+# Rating matrix
+R = np.matrix([[3, 4, 5],
+              [4, 3, 5],
+              [2, 5, 4]])
+
+
+num_users = R.shape[0]
+num_items = R.shape[1]
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
 
 num_users = np.shape(R)[0]
 num_items = np.shape(R)[1]
@@ -105,3 +123,8 @@ print("Finished calculating phi for all the users")
 #todo: 1) Change discrete factors to continuous factors!
 
 
+<<<<<<< HEAD
+=======
+#todo: 1) Change discrete factors to continuous factors! 
+>>>>>>> master
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
