@@ -2,10 +2,14 @@ from __future__ import print_function
 from __future__ import division
 import sys
 import numpy as np
+
 from pgmpy.models import FactorGraph
-from pgmpy.factors.discrete import DiscreteFactor
+from pgmpy.factors.distributions import CustomDistribution
 from pgmpy.factors.continuous import ContinuousFactor
+
+
 from data import build_movies_dict, generate_matrix
+import features
 
 # Set paths
 movies_data = './Data/movies.csv'
@@ -22,7 +26,7 @@ min_rating = 0.5
 max_rating = 5
 small = 1e-9
 
-print('Generating User-Item Matrix...')
+print('Generating User-Item Matrix...\n')
 # User-item rating matrix
 movies_dict = build_movies_dict(movies_data)
 R = generate_matrix(ratings_data, movies_dict)
@@ -31,11 +35,10 @@ R = generate_matrix(ratings_data, movies_dict)
 num_users = np.shape(R)[0]
 num_items = np.shape(R)[1]
 
-print('Initializing...')
+print('Initializing...\n')
 # Initialize Factor Graph
 G = FactorGraph()
 
-# todo: Not sure about the node generation. If we pass 'm1' 'm2' then how do we feed in values to these nodes
 
 # Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
 user_nodes = []
@@ -49,19 +52,19 @@ for i in range(1, num_items+1):
 # Spam Users and Target Items Initializations
 m = np.random.rand(num_users)
 m = [1 if i > 0.5 else 0 for i in np.random.rand(num_users)]
-# user_nodes = m
 
 t = np.random.rand(num_items)
 t = [1 if i > 0.5 else 0 for i in np.random.rand(num_items)]
-# item_nodes = t
 
 # Dict to map nosed to their values
 user_dict = {}
 item_dict = {}
 
-for user in 
+for user_id, user_node in enumerate(user_nodes):
+    user_dict[user_node] = m[user_id]
 
-
+for item_id, item_node in enumerate(item_nodes):
+    item_dict[item_node] = t[item_id]
 
 # Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
@@ -71,91 +74,58 @@ G.add_nodes_from(item_nodes)
 def almost_sigmoid(x, scale, feature, threshold):
     return 1/(1 + np.exp(np.power(-1,(1-x)) * scale * (feature - threshold)))
 
-def item_rating_bias(R, num_users, num_items):
-    rating_bias = []
 
-    for i in range(num_items):
-        r_ui = [R[u, i] for u in range(num_users) if R[u,i] != 0]
-        m_i = [m[u] for u in range(num_users) if R[u,i] == 5]
-
-        first = sum(r_ui)/(len(r_ui) + 1e-9) #Avoid by 0 division
-        second = (sum(r_ui) - max_rating * sum(m_i)) / (len(r_ui) - sum(m_i) + 1e-9)
-
-        rating_bias.append(np.abs(first - second))
-    return rating_bias
-
-def mean_var(R, num_users, num_items):
-    mean_var = []
-    r_i_bar = np.average(R, axis=0)
-
-    for u in range(num_users):
-        I_u_subset = [R[u, i] for i in range(num_items) if R[u,i] !=0 and R[u,i] != 5]
-        avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u,i] !=0 and R[u,i] != 5]
-        mean_var_value = [(first - second)**2 for first, second in zip(I_u_subset, avg_u_subset)]
-        mean_var.append(sum(mean_var_value)/len(mean_var_value))
-
-    return mean_var
-
-print('Building Factors...')
+print('Building Factors...\n')
 # Init factors and factor_vals
 f = []
 g = []
 h = []
 
 # Features
-rating_bias = item_rating_bias(R, num_users, num_items)
-psi = np.var(R, axis = 0)
-phi_u = mean_var(R, num_users, num_items)
+rating_bias = features.item_rating_bias(R, m, num_users, num_items)
+psi_i = features.variance(R)
+phi_u = features.mean_var(R, num_users, num_items)
 
 # Create factors
-# for item in range(num_items):
-#     f_values.append(almost_sigmoid(t[item], alpha_t, rating_bias[item], delta_r))
-#     h_values.append(almost_sigmoid(t[item], beta_2, psi[item], tau_2))
-#
-# for user in range(num_users):
-#     g_values.append(almost_sigmoid(m[user], beta_1, phi_u[user], tau_1))
 
-def g_pdf(user_node, uid):
-    return almost_sigmoid(user_node, beta_1, phi_u[uid], tau_1)
-def f_pdf(item_node, iid):
-    return almost_sigmoid(item_node, beta_2, psi[iid], tau_2)
-def h_pdf(item_node, iid):
-    return almost_sigmoid(item_node, alpha_t, rating_bias[iid], delta_r)
+def g_dist(user_node, user_id):
+    return almost_sigmoid(user_node, beta_1, phi_u[user_id], tau_1)
 
-# todo: figure out how to get the pdfs of the factors in to the model
+def f_dist(item_node, item_id):
+    return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
-temp = g_pdf(1, 0)
+def h_dist(item_node, item_id):
+    return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
 
-print(type(temp))
-
-sys.exit(0)
 
 # Create Factors
-for uid, user_node in enumerate(user_nodes):
-    print(uid, user_node)
-    g.append(ContinuousFactor(variables=[user_node], pdf=g_pdf(user_node, uid)))
+for user_id, user_node in enumerate(user_nodes):
+    g_pdf = CustomDistribution(variables=[user_node, user_id], distribution=g_dist)
+    g.append(ContinuousFactor([user_node], g_pdf))
 
-for iid, item_node in enumerate(item_nodes):
-    h.append(ContinuousFactor(variables=[item_node], pdf=h_pdf(item_node, iid)))
+for item_id, item_node in enumerate(item_nodes):
+    h_pdf = CustomDistribution(variables=[item_node, item_id], distribution=h_dist)
+    h.append(ContinuousFactor([item_node], h_pdf))
 
-for uid, user_node in enumerate(user_nodes):
-    for iid, item_node in enumerate(item_nodes):
-        f.append(ContinuousFactor([user_node, item_node], f_pdf(item_node, iid)))
+    f_pdf = CustomDistribution(variables=[item_node, item_id], distribution=f_dist)
+    f.append(ContinuousFactor([item_node], f_pdf))
 
-G.add_factors(g[0])
+print('Adding Factors to graph...\n')
 
 # Add factors to graph
-# for factor in g:
-#     print(factor)
-    # G.add_factors(factor)
-# for factor in h:
-    # G.add_factors(factor)
-# for factor in f:
-    # G.add_factors(factor)
+for g_factor in g:
+    G.add_factors(g_factor)
 
+for h_factor in h:
+    G.add_factors(h_factor)
 
+for f_factor in f:
+    G.add_factors(f_factor)
 
-print('Adding edges...')
+# print(len(user_nodes), len(g))
+
+# sys.exit(0)
+print('Adding edges...\n')
 
 # Add edges
 for idx in range(len(user_nodes)):
@@ -169,5 +139,6 @@ for i in range(len(f)):
     for j in range(len(user_nodes)):
         G.add_edge(f[i], user_nodes[j])
 
+# print(G.check_model())
 
-print('Done dana done done')
+print('Done dana done done \n')
