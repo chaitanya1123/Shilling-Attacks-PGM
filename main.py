@@ -16,15 +16,14 @@ ratings_data = 'Data/ratings.csv'
 #Generate user-item rating matrix
 movies_dict = build_movies_dict(movies_data)
 R = generate_matrix(ratings_data, movies_dict)
+<<<<<<< HEAD
+=======
 sys.exit(1)
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
 print('Building Fac Graph...')
 G = FactorGraph()
 
 
-# Data Statistics
-
-num_users = 700
-num_targets = 9000
 
 # Create nodes
 user_nodes = ['u1', 'u2', 'u3']
@@ -71,6 +70,8 @@ for i in range(len(f)):
 print('Done')
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 #todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
 =======
 # Rating matrix
@@ -81,7 +82,10 @@ R = np.matrix([[3, 4, 5],
 
 num_users = R.shape[0]
 num_items = R.shape[1]
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
 
+num_users = np.shape(R)[0]
+num_items = np.shape(R)[1]
 
 ##rui (user u's rating on item i)
 def r_u_i(u,i):
@@ -91,22 +95,36 @@ def r_u_i(u,i):
 ##ri (average rating of item i)
 def r_i_dash(i):
     avg_rating = np.sum(R,axis=0)/num_users
-    return avg_rating[0,i]
+    return avg_rating[i]
+
+
+def meetsCondition(u,element):
+    return bool(R[u,element] !=0 and R[u,element] != 5)
 
 ##feature (MeanVar) phi_u for every user u
-def phi_u(u):
-    sum =0
-    count=0
-    for items in range(num_items):
-        if(R[u,items]!=5):
-            count = count+1
-            sum = sum+((R[u,items] - r_i_dash(items))**2)
+phi_u_all = []
+print("Calculating phi_u for all the users")
+for u in range(num_users):
+    avg_rating = np.sum(R, axis=0) / num_users
 
-    sum=sum/count
-    return sum
+    #Iu\Iu_bar
+    u_ratings=[R[u,items] for items in range(num_items) if meetsCondition(u,items)]
 
-#print feature MeanVar of 0th user
-print(phi_u(0))
+    avg_subset_u = [avg_rating[element] for element in range(num_items) if meetsCondition(u,element)]
+    #print(u_ratings)
+    # #print(avg_subset_u)
+    phi_u_arr = [(a_i - b_i)**2 for a_i, b_i in zip(u_ratings,avg_subset_u)]
+    phi_u = sum(phi_u_arr)/len(phi_u_arr)
+    phi_u_all.append(phi_u)
 
+print(phi_u_all)
+print(len(phi_u_all))
+print("Finished calculating phi for all the users")
+#todo: 1) Change discrete factors to continuous factors!
+
+
+<<<<<<< HEAD
+=======
 #todo: 1) Change discrete factors to continuous factors! 
 >>>>>>> master
+>>>>>>> eb399debfa002925ce553d4627dde7a2c549583b
