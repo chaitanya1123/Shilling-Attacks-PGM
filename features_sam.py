@@ -14,6 +14,13 @@ min_rating = 0.5
 max_rating = 5
 small = 1e-9
 
+R1 = np.matrix([[3, 4, 5],
+              [4, 3, 5],
+              [2, 5, 4]])
+num_users = np.shape(R1)[0]
+num_items = np.shape(R1)[1]
+
+
 
 def item_rating_bias(R, m, num_users, num_items):
     rating_bias = []
@@ -34,7 +41,7 @@ def mean_var(R, num_users, num_items):
 
     for u in range(num_users):
         I_u_subset = [R[u, i] for i in range(num_items) if R[u,i] !=0 and R[u,i] != 5]
-        avg_u_subset = [r_i_bar[j] for j in range(num_items) if R[u,j] !=0 and R[u,j] != 5]
+        avg_u_subset = [r_i_bar[0,j] for j in range(num_items) if R[u,j] !=0 and R[u,j] != 5]
         mean_var_value = [(first - second)**2 for first, second in zip(I_u_subset, avg_u_subset)]
         mean_var.append(sum(mean_var_value)/len(mean_var_value))
 
@@ -56,7 +63,7 @@ def WDMA(R, num_users, num_items):
     for u in range(1):
         I_u_subset = [R[u, i] for i in range(num_items) if R[u, i]!=0]
         print(I_u_subset)
-        avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u,i]!=0]
+        avg_u_subset = [r_i_bar[0,i] for i in range(num_items) if R[u,i]!=0]
         print(avg_u_subset)
         print(l_i)
         WDMA_val = [(abs(first - second))/(l_i[u]**2) for first,second in zip(I_u_subset, avg_u_subset)]
@@ -75,7 +82,7 @@ def WDA(R, num_users, num_items):
 
     for u in range(num_users):
         I_u_subset = [R[u, i] for i in range(num_items) if R[u, i] != 0]
-        avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u, i] != 0]
+        avg_u_subset = [r_i_bar[0,i] for i in range(num_items) if R[u, i] != 0]
         WDA_val = [(abs(first - second))/l_i[u] for first,second in zip(I_u_subset, avg_u_subset)]
         WDA.append(sum(WDA_val))
 
