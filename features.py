@@ -20,10 +20,10 @@ def item_rating_bias(R, m, num_users, num_items):
 
     for i in range(num_items):
         r_ui = [R[u, i] for u in range(num_users) if R[u,i] != 0]
-        m_i = [m[u] for u in range(num_users) if R[u,i] == 5]
+        M_i = [m[u] for u in range(num_users) if R[u,i] == 5]
 
-        first = sum(r_ui)/(len(r_ui) + 1e-9) #Avoid by 0 division
-        second = (sum(r_ui) - max_rating * sum(m_i)) / (len(r_ui) - sum(m_i) + 1e-9)
+        first = sum(r_ui)/(len(r_ui) + small) #Avoid by 0 division
+        second = (sum(r_ui) - max_rating * sum(M_i)) / (len(r_ui) - sum(M_i) + small)
 
         rating_bias.append(np.abs(first - second))
     return rating_bias
