@@ -1,11 +1,13 @@
 from __future__ import print_function
 from __future__ import division
 import sys
+import time
 import numpy as np
 
 from pgmpy.models import FactorGraph
 from pgmpy.factors.distributions import CustomDistribution
 from pgmpy.factors.continuous import ContinuousFactor
+from pgmpy.factors.discrete import DiscreteFactor
 
 
 from data import build_movies_dict, generate_matrix
@@ -28,8 +30,10 @@ small = 1e-9
 
 print('Generating User-Item Matrix...\n')
 # User-item rating matrix
-movies_dict = build_movies_dict(movies_data)
-R = generate_matrix(ratings_data, movies_dict)
+# movies_dict = build_movies_dict(movies_data)
+# R = generate_matrix(ratings_data, movies_dict)
+
+R = np.random.randint(0, 5, (5, 5))
 
 # Data Statistics
 num_users = np.shape(R)[0]
@@ -74,6 +78,10 @@ G.add_nodes_from(item_nodes)
 def almost_sigmoid(x, scale, feature, threshold):
     return 1/(1 + np.exp(np.power(-1,(1-x)) * scale * (feature - threshold)))
 
+def binarize(num, num_users):
+    b = bin(num)[2:]
+    op = list('0'*(num_users - len(b)) + b)
+    return op
 
 print('Building Factors...\n')
 # Init factors and factor_vals
@@ -82,7 +90,7 @@ g = []
 h = []
 
 # Features
-rating_bias = features.item_rating_bias(R, m, num_users, num_items)
+# rating_bias = features.item_rating_bias(R, m, num_users, num_items)
 psi_i = features.variance(R)
 phi_u = features.mean_var(R, num_users, num_items)
 
@@ -91,24 +99,37 @@ phi_u = features.mean_var(R, num_users, num_items)
 def g_dist(user_node, user_id):
     return almost_sigmoid(user_node, beta_1, phi_u[user_id], tau_1)
 
-def f_dist(item_node, item_id):
+def h_dist(item_node, item_id):
     return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
-def h_dist(item_node, item_id):
+def f_dist(item_node, item_id):
     return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
 
+rating_bias=[]
+
+for idx in range(np.power(2, num_users+1)):
+    b = binarize(idx, num_users)
+    t = b[0]
+    m = b[1:]
+    rating_bias.append(features.item_rating_bias(R, m, num_users, num_items))
 
 # Create Factors
 for user_id, user_node in enumerate(user_nodes):
-    g_pdf = CustomDistribution(variables=[user_node, user_id], distribution=g_dist)
-    g.append(ContinuousFactor([user_node], g_pdf))
+
+    g_list = [g_dist(0, user_id), g_dist(1, user_id)]
+    g.append(DiscreteFactor([user_node], [2], g_list))
 
 for item_id, item_node in enumerate(item_nodes):
-    h_pdf = CustomDistribution(variables=[item_node, item_id], distribution=h_dist)
-    h.append(ContinuousFactor([item_node], h_pdf))
+    h_list = [h_dist(0, item_id), h_dist(1, item_id)]
+    h.append(DiscreteFactor([item_node], [2], h_list))
 
-    f_pdf = CustomDistribution(variables=[item_node, item_id], distribution=f_dist)
-    f.append(ContinuousFactor([item_node], f_pdf))
+f_list = []
+
+for item_id, item_node in enumerate(item_nodes):
+    for user_id, user_node in enumerate(user_nodes):
+        f_list.append(almost_sigmoid())
+
+    f.append(DiscreteFactor([user_nodes, item_node], [32, 2], rating_bias))
 
 print('Adding Factors to graph...\n')
 
