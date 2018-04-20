@@ -1,24 +1,48 @@
 from __future__ import print_function
+from __future__ import division
 import sys
+import time
 import numpy as np
+
 from pgmpy.models import FactorGraph
+from pgmpy.factors.distributions import CustomDistribution
+from pgmpy.factors.continuous import ContinuousFactor
 from pgmpy.factors.discrete import DiscreteFactor
+
+
 from data import build_movies_dict, generate_matrix
+import features
 
 # Set paths
-movies_data = 'Data/movies.csv'
-ratings_data = 'Data/ratings.csv'
+movies_data = './Data/movies.csv'
+ratings_data = './Data/ratings.csv'
 
+# Hyper-parameters
+alpha_t = -3
+delta_r = 0.35
+beta_1 = -1
+tau_1 = 0.5
+beta_2 = 1
+tau_2 = 1.5
+min_rating = 0.5
+max_rating = 5
+small = 1e-9
+
+print('Generating User-Item Matrix...\n')
 # User-item rating matrix
-movies_dict = build_movies_dict(movies_data)
-R = generate_matrix(ratings_data, movies_dict)
+# movies_dict = build_movies_dict(movies_data)
+# R = generate_matrix(ratings_data, movies_dict)
 
-# Initialize Factor Graph
-G = FactorGraph()
+R = np.random.randint(0, 5, (5, 5))
 
 # Data Statistics
 num_users = np.shape(R)[0]
 num_items = np.shape(R)[1]
+
+print('Initializing...\n')
+# Initialize Factor Graph
+G = FactorGraph()
+
 
 # Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
 user_nodes = []
@@ -29,108 +53,102 @@ item_nodes = []
 for i in range(1, num_items+1):
     item_nodes.append('t' + str(i))
 
-
 # Spam Users and Target Items Initializations
 m = np.random.rand(num_users)
-m = [1  if i>0.5  else 0 for i in m]
+m = [1 if i > 0.5 else 0 for i in np.random.rand(num_users)]
 
 t = np.random.rand(num_items)
-t = [1  if i>0.5  else 0 for i in t]
+t = [1 if i > 0.5 else 0 for i in np.random.rand(num_items)]
 
+# Dict to map nosed to their values
+user_dict = {}
+item_dict = {}
+
+for user_id, user_node in enumerate(user_nodes):
+    user_dict[user_node] = m[user_id]
+
+for item_id, item_node in enumerate(item_nodes):
+    item_dict[item_node] = t[item_id]
 
 # Add Nodes to Factor Graph
 G.add_nodes_from(user_nodes)
 G.add_nodes_from(item_nodes)
 
+# Factor Helper Functions
+def almost_sigmoid(x, scale, feature, threshold):
+    return 1/(1 + np.exp(np.power(-1,(1-x)) * scale * (feature - threshold)))
 
-# Item Rating Bias
-min_rating = 1
-max_rating = 5
+def binarize(num, num_users):
+    b = bin(num)[2:]
+    op = list('0'*(num_users - len(b)) + b)
+    return op
 
-r_item_bias = []
-
-for item in range(0,num_items):
-    item_ratings = R[:,item]
-    m_i = (item_ratings == max_rating)
-    r_i = ((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i))
-    r_item_bias.append(((sum(item_ratings)/num_users) - (sum(item_ratings) - max_rating*sum(m_i)))/(num_users - sum(m_i)))
-
-
-
-# Factor (f) over each Item
-alpha_t = -0.1
-del_r = 0.1
-
+print('Building Factors...\n')
+# Init factors and factor_vals
 f = []
-
-for item in range(0,num_items):
-    f_i = 1/(1 + np.exp(np.power(-1,1-t[item])*alpha_t*(r_item_bias[item] - del_r)))
-    f.append(f_i)
-
-
-# Factor (h) over each Item
-phi = np.var(R,axis = 0)
-beta_2 = 0.1
-tau_2 = 0.1
-
-h = []
-
-for item in range(0,num_items):
-    h_i = 1/(1 + np.exp(np.power(-1,1 - t[item])*beta_2*(phi[item]-tau_2)))
-    h.append(h_i)
-
-
-
-# Phi for Every User
-phi = []
-average_item = np.average(R,axis = 0)
-
-for user in range(0,num_users):
-    ratings_u = R[user,:]
-    I_non_max_u = ratings_u[ratings_u<max_rating]
-    phi_u = sum(np.power(ratings_u[I_non_max_u] - average_item[I_non_max_u],2))/(sum(I_non_max_u))
-    phi.append(phi_u)
-    
-
-# Factor (g) over Each User
-beta_1 = 0.1
-tau_1 = 0.1
-
-g = []
-
-for user in range(0,num_users):
-    g_u = 1/(91 + np.exp(np.power(-1,1-m[user])*beta_1*(phi[user] - tau_1)))
-    g.append(g_u)
-
-
-
-#Create Factors
 g = []
 h = []
-f = []
 
+# Features
+# rating_bias = features.item_rating_bias(R, m, num_users, num_items)
+psi_i = features.variance(R)
+phi_u = features.mean_var(R, num_users, num_items)
 
+# Create factors
 
+def g_dist(user_node, user_id):
+    return almost_sigmoid(user_node, beta_1, phi_u[user_id], tau_1)
 
-for node in user_nodes:
-    g.append(DiscreteFactor([node], [2], np.ones(2)))
+def h_dist(item_node, item_id):
+    return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
-for node in item_nodes:
-    h.append(DiscreteFactor([node], [2], np.ones(2)))
+def f_dist(item_node, item_id):
+    return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
 
-for user in user_nodes:
-    for item in item_nodes:
-        f.append(DiscreteFactor([user,item], [2,2], np.ones([2,2])))
+rating_bias=[]
 
-#Add factors to graph
-for factor in g:
-    G.add_factors(factor)
-for factor in h:
-    G.add_factors(factor)
-for factor in f:
-    G.add_factors(factor)
+for idx in range(np.power(2, num_users+1)):
+    b = binarize(idx, num_users)
+    t = b[0]
+    m = b[1:]
+    rating_bias.append(features.item_rating_bias(R, m, num_users, num_items))
 
-#Add edges
+# Create Factors
+for user_id, user_node in enumerate(user_nodes):
+
+    g_list = [g_dist(0, user_id), g_dist(1, user_id)]
+    g.append(DiscreteFactor([user_node], [2], g_list))
+
+for item_id, item_node in enumerate(item_nodes):
+    h_list = [h_dist(0, item_id), h_dist(1, item_id)]
+    h.append(DiscreteFactor([item_node], [2], h_list))
+
+f_list = []
+
+for item_id, item_node in enumerate(item_nodes):
+    for user_id, user_node in enumerate(user_nodes):
+        f_list.append(almost_sigmoid())
+
+    f.append(DiscreteFactor([user_nodes, item_node], [32, 2], rating_bias))
+
+print('Adding Factors to graph...\n')
+
+# Add factors to graph
+for g_factor in g:
+    G.add_factors(g_factor)
+
+for h_factor in h:
+    G.add_factors(h_factor)
+
+for f_factor in f:
+    G.add_factors(f_factor)
+
+# print(len(user_nodes), len(g))
+
+# sys.exit(0)
+print('Adding edges...\n')
+
+# Add edges
 for idx in range(len(user_nodes)):
     G.add_edge(user_nodes[idx], g[idx])
 
@@ -142,4 +160,6 @@ for i in range(len(f)):
     for j in range(len(user_nodes)):
         G.add_edge(f[i], user_nodes[j])
 
-#todo: 1) Change discrete factors to continuous factors! 2) Code rating bias, f, g, h
+# print(G.check_model())
+
+print('Done dana done done \n')
