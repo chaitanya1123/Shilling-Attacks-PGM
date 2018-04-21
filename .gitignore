@@ -124,3 +124,5 @@ venv.bak/
 *.pyc
 
 \.idea/
+
+SDLib
