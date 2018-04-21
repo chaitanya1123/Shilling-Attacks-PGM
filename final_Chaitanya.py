@@ -3,7 +3,7 @@ from __future__ import division
 import sys
 import time
 import numpy as np
-
+import matplotlib.pyplot as plt
 from pgmpy.models import FactorGraph
 from pgmpy.factors.distributions import CustomDistribution
 from pgmpy.factors.continuous import ContinuousFactor
@@ -22,7 +22,7 @@ ratings_data = './Data/ratings.csv'
 alpha_t = -3
 delta_r = 0.35
 beta_1 = -1
-tau_1 = 0.5
+tau_1 = 12
 beta_2 = 1
 tau_2 = 1.5
 min_rating = 0.5
@@ -101,6 +101,11 @@ h = []
 # rating_bias = features.item_rating_bias(R, m, num_users, num_items)
 psi_i = features.variance(R)
 phi_u = features.mean_var(R, num_users, num_items)
+
+# plt.hist(psi_i,50)
+# plt.show()
+# sys.exit(0)
+
 
 # Create factors
 
