@@ -111,8 +111,8 @@ def g_dist(user_node, user_id):
 def h_dist(item_node, item_id):
     return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
-# def f_dist(item_node, item_id):
-#     return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
+def f_dist(item_node, item_id):
+    return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
 
 # Create Factors
 for user_id, user_node in enumerate(user_nodes):
@@ -123,8 +123,11 @@ for item_id, item_node in enumerate(item_nodes):
 
 # Calc Mi
 M_i = []
+M_i_Users = []
 for i in range(num_items):
     m_i = [m[u] for u in range(num_users) if R[u,i] == 5]
+    m_i_users = [u for u in range(num_users) if R[u,i] == 5]
+    M_i_Users.append(m_i_users)
     M_i.append(m_i)
 
 def split_list(list, jump):
@@ -133,18 +136,19 @@ def split_list(list, jump):
         temp.append(list[i:i+jump])
     return temp
 
-def group_rating_bias(R, m, num_users, num_items, m_i_k, G_i):
-    rating_bias = []
-    for k in range(G_i):
-        group_len = D if k < G_i else len(M_i) % D
-        U_i_cap = [m[u] for u in range(num_users) if R[u,i] != 5]
-        r_ui_cap = [R[u, i] for u in U_i_cap]
-        R_i_cap = sum(r_ui_cap)
-        w_i_k = group_len/len(M_i)
-        first = (R_i_cap * w_i_k + max_rating * group_len) / (len(U_i_cap) * w_i_k + group_len)
-        second = (R_i_cap * w_i_k + max_rating * sum(m_i_k)) / (len(U_i_cap) * w_i_k + sum(m_i_k))
+def group_rating_bias(R, m, num_users, num_items, m_i_k):
 
-        rating_bias.append(np.abs(first - second))
+    # for k in range(G_i):
+    # group_len = D if k < G_i else len(M_i) % D
+    group_len = len(m_i_k)
+    U_i_cap = [m[u] for u in range(num_users) if R[u,i] != 5]
+    r_ui_cap = [R[u, i] for u in U_i_cap]
+    R_i_cap = sum(r_ui_cap)
+    w_i_k = group_len/len(M_i)
+    first = (R_i_cap * w_i_k + max_rating * group_len) / (len(U_i_cap) * w_i_k + group_len)
+    second = (R_i_cap * w_i_k + max_rating * sum(m_i_k)) / (len(U_i_cap) * w_i_k + sum(m_i_k))
+
+    rating_bias = np.abs(first - second)
     return rating_bias
 
 
@@ -152,21 +156,192 @@ M_i_k_all_items = []
 r_i_M_i_k = []
 
 # D = 8
-for item_node in item_nodes:
-    M_i_k = []
-    for m_idx in M_i:
-        # Divide users into groups
-        l = len(m_idx)
-        G_i = int(np.abs(l) / D) + 1 # Randomly divide user nodes in M_i into G_i groups
-        M_i_k.append(split_list(m_idx, G_i))
-        # print(len(M_i_k))
 
-    M_i_k_all_items.append(M_i_k)
-    # r_i_M_i_k.append(group_rating_bias(R, m, num_users, num_items, m_i_k, G_i))
+M_i_k = []
+M_i_k_users = []
+G_i_vec =[]
+for m_idx in M_i:
+    # Divide users into groups
+    l = len(m_idx)
+    G_i = int(np.abs(l) / D) + 1 # Randomly divide user nodes in M_i into G_i groups
+    G_i_vec.append(G_i)
+    M_i_k.append(split_list(m_idx, G_i))
 
-print(len(M_i_k_all_items))
+for m_idx_usr in M_i_Users:
+    # Divide users into groups
+    l = len(m_idx_usr)
+    G_i = int(np.abs(l) / D) + 1 # Randomly divide user nodes in M_i into G_i groups
+    G_i_vec.append(G_i)
+    M_i_k_users.append(split_list(m_idx_usr, G_i))
 
-        # Get rating bias for that group
+def get_potential(group_length):
+
+    if group_length == 1:
+        potential_i = np.zeros((2,2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                m_i_k = [v1]
+                rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                potential_i[v0, v1] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
+
+    elif group_length == 2:
+        potential_i = np.zeros((2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    m_i_k = [v1, v2]
+                    rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                    potential_i[v0, v1, v2] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
+
+    elif group_length == 3:
+        potential_i = np.zeros((2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        m_i_k = [v1, v2, v3]
+                        rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                        potential_i[v0, v1, v2, v3] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
+
+    elif group_length == 4:
+        potential_i = np.zeros((2, 2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        for v4 in range(2):
+                            m_i_k = [v1, v2, v3, v4]
+                            rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                            potential_i[v0, v1, v2, v3, v4] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
+
+    elif group_length == 5:
+        potential_i = np.zeros((2, 2, 2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        for v4 in range(2):
+                            for v5 in range(2):
+                                m_i_k = [v1, v2, v3, v4, v5]
+                                rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                                potential_i[v0, v1, v2, v3, v4, v5] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
+
+    elif group_length == 6:
+        potential_i = np.zeros((2, 2, 2, 2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        for v4 in range(2):
+                            for v5 in range(2):
+                                for v6 in range(2):
+                                    m_i_k = [v1, v2, v3, v4, v5, v6]
+                                    rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                    potential_i[v0, v1, v2, v3, v4, v5, v6] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
+
+    elif group_length == 7:
+        potential_i = np.zeros((2, 2, 2, 2, 2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        for v4 in range(2):
+                            for v5 in range(2):
+                                for v6 in range(2):
+                                    for v7 in range(2):
+                                        m_i_k = [v1, v2, v3, v4, v5, v6, v7]
+                                        # print(m_i_k)
+                                        rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                        potential_i[v0, v1, v2, v3, v4, v5, v6, v7] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
+
+    elif group_length == 8:
+        potential_i = np.zeros((2, 2, 2, 2, 2, 2, 2, 2, 2))
+
+        for v0 in range(2):
+            for v1 in range(2):
+                for v2 in range(2):
+                    for v3 in range(2):
+                        for v4 in range(2):
+                            for v5 in range(2):
+                                for v6 in range(2):
+                                    for v7 in range(2):
+                                        for v8 in range(2):
+                                            m_i_k = [v1, v2, v3, v4, v5, v6, v7, v8]
+                                            # print(m_i_k)
+                                            rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                            potential_i[v0, v1, v2, v3, v4, v5, v6, v7, v8] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
+
+
+    return potential_i
+
+
+user_id_list =[]
+for u in M_i_k_users[0][5]:
+    user_id_list.append('m' + str(u))
+
+
+for group in M_i_k_users[0]:
+    for u in group:
+        user_id_list.append('m' + str(u))
+
+if len(user_id_list)==8:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+         user_id_list[6], user_id_list[7]], potential=get_potential(8))
+elif len(user_id_list)==7:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+         user_id_list[6]], potential=get_potential(7))
+elif len(user_id_list)==6:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5]],
+        potential=get_potential(6))
+elif len(user_id_list)==5:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4]],
+        potential=get_potential(5))
+elif len(user_id_list)==4:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3]],
+        potential=get_potential(4))
+elif len(user_id_list)==3:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1], user_id_list[2]],
+        potential=get_potential(3))
+elif len(user_id_list)==2:
+    Graph.factor(
+        ['t0', user_id_list[0], user_id_list[1]],
+        potential=get_potential(2))
+elif len(user_id_list) == 1:
+Graph.factor(
+    ['t0', user_id_list[0]],
+    potential=get_potential(1))
+    
+
+
+
+
+Graph.factor(['t0',user_id_list[0],user_id_list[1],user_id_list[2],user_id_list[3],user_id_list[4],user_id_list[5],user_id_list[6],user_id_list[7]],potential = get_potential(8))
+
+
+
+# # Run (loopy) belief propagation (LBP)
+# iters, converged = Graph.lbp(normalize=True)
+# print('LBP ran for %d iterations. Converged = %r' % (iters, converged))
+#
+# # Print out the final messages from LBP
+# Graph.print_messages()
+#
+#
+# # Print out the final marginals
+# Graph.print_rv_marginals()
 
 
 
