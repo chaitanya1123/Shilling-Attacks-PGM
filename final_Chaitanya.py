@@ -323,7 +323,7 @@ elif len(user_id_list) == 1:
 Graph.factor(
     ['t0', user_id_list[0]],
     potential=get_potential(1))
-    
+
 
 
 
