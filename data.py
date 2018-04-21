@@ -11,12 +11,14 @@ from SDLib.shillingmodels.hybridAttack import HybridAttack
 
 np.set_printoptions(threshold=np.inf)
 
-def simulate_shilling_attack():
+
+
+def simulate_shilling_attack(label_name, profile_name):
     attack = AverageAttack('./config/config.conf')
     attack.insertSpam()
     # attack.farmLink()
-    attack.generateLabels('labels-from-data.txt')
-    attack.generateProfiles('profiles-from-data.txt')
+    attack.generateLabels(label_name)
+    attack.generateProfiles(profile_name)
     # attack.generateSocialConnections('relations.txt')
 
 def build_movies_dict(movies_file):
@@ -42,6 +44,7 @@ def generate_matrix(input_file, movies_dict):
     return X
 
 def generate_dirty_matrix(input_file, movies_dict):
+    # users = 805
     users = 738
     movies = len(movies_dict)
 
@@ -68,8 +71,8 @@ if __name__ == '__main__':
     
     movies_file = 'Data/MovieLens/small/movies.csv'
     ratings_file = 'Data/MovieLens/small/ratings.csv'
-    dirty_ratings_file = 'Data/dirty/MovieLens/small/profiles.txt'
-    spam_users_file = 'Data/dirty/MovieLens/small/labels.txt'
+    # dirty_ratings_file = 'Data/dirty/MovieLens/small/' + profile_name
+    # spam_users_file = 'Data/dirty/MovieLens/small/' + label_name
 
     simulate_shilling_attack()
     # movies_dict = build_movies_dict(movies_file)
