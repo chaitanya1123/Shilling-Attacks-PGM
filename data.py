@@ -27,10 +27,24 @@ def generate_matrix(input_file, movies_dict):
             X[int(user)-1, id] = float(rating)
     return X
 
+def generate_dirty_matrix(input_file, movies_dict):
+    users = 738
+    movies = len(movies_dict)
+
+    X = np.zeros(shape=(users,movies))
+    with open(input_file, 'r') as f:
+        for i,line in enumerate(f):
+            user, movie_id, rating = line.split(' ')
+            id = movies_dict[int(movie_id)]
+            X[int(user)-1, id] = float(rating)
+    return X
+
 if __name__ == '__main__':
     
     movies_file = 'Data/movies.csv'
     ratings_file = 'Data/ratings.csv'
+    dirty_ratings_file = 'Data/dirty/profiles.txt'
 
     movies_dict = build_movies_dict(movies_file)
-    R = generate_matrix(ratings_file, movies_dict)
+    # R = generate_matrix(ratings_file, movies_dict)
+    R = generate_dirty_matrix(dirty_ratings_file, movies_dict)
