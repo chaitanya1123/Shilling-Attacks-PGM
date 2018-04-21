@@ -59,10 +59,10 @@ for i in range(num_items):
 
 # Spam Users and Target Items Initializations
 m = np.random.rand(num_users)
-m = [1 if i > 0.5 else 0 for i in np.random.rand(num_users)]
+m = [0 if i > 0.5 else 0 for i in np.random.rand(num_users)]
 
 t = np.random.rand(num_items)
-t = [1 if i > 0.5 else 0 for i in np.random.rand(num_items)]
+t = [0 if i > 0.5 else 0 for i in np.random.rand(num_items)]
 
 
 # Dict to map nosed to their values
@@ -92,9 +92,8 @@ def binarize(num, num_users):
     op = list('0'*(num_users - len(b)) + b)
     return op
 
-print('Building Factors...\n')
+print('Building Unary Factors...\n')
 # Init factors and factor_vals
-f = []
 g = []
 h = []
 
@@ -111,15 +110,13 @@ def g_dist(user_node, user_id):
 def h_dist(item_node, item_id):
     return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
-def f_dist(item_node, item_id):
-    return almost_sigmoid(item_node, alpha_t, rating_bias[item_id], delta_r)
-
 # Create Factors
 for user_id, user_node in enumerate(user_nodes):
     Graph.factor([user_node], potential=np.array([g_dist(0, user_id), g_dist(1, user_id)]))
 
 for item_id, item_node in enumerate(item_nodes):
     Graph.factor([item_node], potential=np.array([h_dist(0, item_id), h_dist(1, item_id)]))
+
 
 # Calc Mi
 M_i = []
@@ -152,11 +149,7 @@ def group_rating_bias(R, m, num_users, num_items, m_i_k):
     return rating_bias
 
 
-M_i_k_all_items = []
-r_i_M_i_k = []
-
 # D = 8
-
 M_i_k = []
 M_i_k_users = []
 G_i_vec =[]
@@ -286,77 +279,61 @@ user_id_list =[]
 for u in M_i_k_users[0][5]:
     user_id_list.append('m' + str(u))
 
+print('Building Binary Factors')
 
-for group in M_i_k_users[0]:
-    for u in group:
-        user_id_list.append('m' + str(u))
+now = time.time()
+for item_id, item_node in enumerate(item_nodes):
+    for group in M_i_k_users[item_id]:
+        for u in group:
+            user_id_list.append('m' + str(u))
 
-if len(user_id_list)==8:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
-         user_id_list[6], user_id_list[7]], potential=get_potential(8))
-elif len(user_id_list)==7:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
-         user_id_list[6]], potential=get_potential(7))
-elif len(user_id_list)==6:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5]],
-        potential=get_potential(6))
-elif len(user_id_list)==5:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4]],
-        potential=get_potential(5))
-elif len(user_id_list)==4:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3]],
-        potential=get_potential(4))
-elif len(user_id_list)==3:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1], user_id_list[2]],
-        potential=get_potential(3))
-elif len(user_id_list)==2:
-    Graph.factor(
-        ['t0', user_id_list[0], user_id_list[1]],
-        potential=get_potential(2))
-elif len(user_id_list) == 1:
-Graph.factor(
-    ['t0', user_id_list[0]],
-    potential=get_potential(1))
+        if len(user_id_list)==8:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+                 user_id_list[6], user_id_list[7]], potential=get_potential(8))
+        elif len(user_id_list)==7:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+                 user_id_list[6]], potential=get_potential(7))
+        elif len(user_id_list)==6:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5]],
+                potential=get_potential(6))
+        elif len(user_id_list)==5:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4]],
+                potential=get_potential(5))
+        elif len(user_id_list)==4:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3]],
+                potential=get_potential(4))
+        elif len(user_id_list)==3:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2]],
+                potential=get_potential(3))
+        elif len(user_id_list)==2:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1]],
+                potential=get_potential(2))
+        elif len(user_id_list) == 1:
+            Graph.factor(
+                [item_node, user_id_list[0]],
+                potential=get_potential(1))
 
-
-
-
-
-Graph.factor(['t0',user_id_list[0],user_id_list[1],user_id_list[2],user_id_list[3],user_id_list[4],user_id_list[5],user_id_list[6],user_id_list[7]],potential = get_potential(8))
-
-
+# print('_______________%f seconds__________' % (time.time() - now))
 
 # # Run (loopy) belief propagation (LBP)
-# iters, converged = Graph.lbp(normalize=True)
-# print('LBP ran for %d iterations. Converged = %r' % (iters, converged))
+now2 = time.time()
+iters, converged = Graph.lbp(normalize=False)
+print('LBP ran for %d iterations. Converged = %r' % (iters, converged))
+print('_______________%f seconds__________' % (time.time() - now2))
+
 #
 # # Print out the final messages from LBP
 # Graph.print_messages()
 #
 #
 # # Print out the final marginals
-# Graph.print_rv_marginals()
+Graph.print_rv_marginals()
 
-
-
-sys.exit(0)
-
-
-# f_list = []
-#
-# for item_id, item_node in enumerate(item_nodes):
-#     for user_id, user_node in enumerate(user_nodes):
-#         f_list.append(almost_sigmoid())
-#
-#     f.append(DiscreteFactor([user_nodes, item_node], [32, 2], rating_bias))
-
-# print(len(user_nodes), len(g))
-
-# sys.exit(0)
 # print('Done dana done done \n')
