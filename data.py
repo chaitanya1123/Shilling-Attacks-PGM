@@ -3,7 +3,21 @@ import sys
 import numpy as np
 import pandas as pd
 
+from SDLib.shillingmodels.averageAttack import AverageAttack
+from SDLib.shillingmodels.bandwagonAttack import BandWagonAttack
+from SDLib.shillingmodels.randomAttack import RandomAttack
+from SDLib.shillingmodels.RR_Attack import RR_Attack
+from SDLib.shillingmodels.hybridAttack import HybridAttack
+
 np.set_printoptions(threshold=np.inf)
+
+def simulate_shilling_attack():
+    attack = AverageAttack('./config/config.conf')
+    attack.insertSpam()
+    # attack.farmLink()
+    attack.generateLabels('labels-from-data.txt')
+    attack.generateProfiles('profiles-from-data.txt')
+    # attack.generateSocialConnections('relations.txt')
 
 def build_movies_dict(movies_file):
     movie_id_dict = {}
@@ -39,12 +53,26 @@ def generate_dirty_matrix(input_file, movies_dict):
             X[int(user)-1, id] = float(rating)
     return X
 
+def generate_user_spam_list(input_file):
+
+    spam_users = np.zeros((738, 1))
+    with open(input_file, 'r') as f:
+        for i,line in enumerate(f):
+            user, is_spam = line.split(' ')
+            spam_users[int(user)-1] = int(is_spam)
+    return spam_users
+
+
+
 if __name__ == '__main__':
     
-    movies_file = 'Data/movies.csv'
-    ratings_file = 'Data/ratings.csv'
-    dirty_ratings_file = 'Data/dirty/profiles.txt'
+    movies_file = 'Data/MovieLens/small/movies.csv'
+    ratings_file = 'Data/MovieLens/small/ratings.csv'
+    dirty_ratings_file = 'Data/dirty/MovieLens/small/profiles.txt'
+    spam_users_file = 'Data/dirty/MovieLens/small/labels.txt'
 
-    movies_dict = build_movies_dict(movies_file)
+    simulate_shilling_attack()
+    # movies_dict = build_movies_dict(movies_file)
     # R = generate_matrix(ratings_file, movies_dict)
-    R = generate_dirty_matrix(dirty_ratings_file, movies_dict)
+    # R = generate_dirty_matrix(dirty_ratings_file, movies_dict)
+    # spam_users = generate_user_spam_list(spam_users_file)
