@@ -14,7 +14,8 @@ np.set_printoptions(threshold=np.inf)
 
 
 def simulate_shilling_attack(label_name, profile_name):
-    attack = AverageAttack('./config/config-100k.conf')
+    # attack = AverageAttack('./config/config-100k.conf')
+    attack = RandomAttack('./config/config-100k.conf')
     attack.insertSpam()
     # attack.farmLink()
     attack.generateLabels(label_name)

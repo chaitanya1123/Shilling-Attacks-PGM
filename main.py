@@ -15,8 +15,10 @@ import features
 
 alpha_t = -3
 delta_r = 0.35
-beta_1 = -1
-tau_1 = 0.5
+beta_1 = 1
+# beta_1 = -1
+# tau_1 = 0.5
+tau_1 = 0.0007
 beta_2 = 1
 tau_2 = 1.5
 min_rating = 0.5
@@ -27,10 +29,10 @@ D = 8
 
 print('\nSimulating Shilling Attack...')
 
-label_name = 'labels-0.1-10-50'
-profile_name = 'profiles-0.1-10-50'
+label_name = 'labels-random-0.1-10-50'
+profile_name = 'profiles-random-0.1-10-50'
 
-simulate_shilling_attack(label_name, profile_name)
+# simulate_shilling_attack(label_name, profile_name)
 
 print('Generating User-Item Matrix...\n')
 
@@ -104,6 +106,12 @@ h = []
 # rating_bias = features.item_rating_bias(R, m, num_users, num_items)
 psi_i = features.variance(R, num_users, num_items)
 phi_u = features.mean_var(R, num_users, num_items)
+# phi_u = features.WDMA(R, num_users, num_items)
+
+# plt.hist(phi_u, 150)
+# plt.show()
+# sys.exit(0)
+
 
 # Define Factor Distributions
 def g_dist(user_node, user_id):

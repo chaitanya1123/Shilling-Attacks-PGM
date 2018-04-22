@@ -72,7 +72,9 @@ def WDMA(R, num_users, num_items):
     for u in range(num_users):
         I_u_subset = [R[u, i] for i in range(num_items) if R[u, i] != 0]
         avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u,i] != 0]
-        WDMA_val = [(abs(first - second))/(l_i[u]**2 + 1e-9) for first, second in zip(I_u_subset, avg_u_subset)]
+        n_u = len(I_u_subset)
+        WDMA_val = [abs(I_u_subset[i] - avg_u_subset[i]) / (l_i[i]**2 + 1e-9) for i in range(n_u)]
+        # WDMA_val = [(abs(first - second))/(l_i[idx]**2 + 1e-9) for idx, first, second in enumerate(zip(I_u_subset, avg_u_subset))]
         WDMA.append(sum(WDMA_val)/(len(I_u_subset) + 1e-9))
 
     return WDMA
