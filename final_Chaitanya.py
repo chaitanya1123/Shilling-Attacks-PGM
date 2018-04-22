@@ -4,19 +4,14 @@ import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from pgmpy.models import FactorGraph
-from pgmpy.factors.distributions import CustomDistribution
-from pgmpy.factors.continuous import ContinuousFactor
-from pgmpy.factors.discrete import DiscreteFactor
 
 import factorgraph as fg
-
 from data import build_movies_dict, generate_matrix
 import features
 
 # Set paths
-movies_data = './Data/movies.csv'
-ratings_data = './Data/ratings.csv'
+movies_data = './Data/MovieLens/small/movies.csv'
+ratings_data = './Data/MovieLens/small/ratings.csv'
 
 # Hyper-parameters
 alpha_t = -3
@@ -102,9 +97,11 @@ h = []
 psi_i = features.variance(R)
 phi_u = features.mean_var(R, num_users, num_items)
 
+print(np.average(phi_u))
+
 # plt.hist(psi_i,50)
 # plt.show()
-# sys.exit(0)
+#sys.exit(0)
 
 
 # Create factors
@@ -138,14 +135,13 @@ def split_list(list, jump):
         temp.append(list[i:i+jump])
     return temp
 
-def group_rating_bias(R, m, num_users, num_items, m_i_k):
+def group_rating_bias(R, num_users,item, m_i_k):
 
-    # for k in range(G_i):
-    # group_len = D if k < G_i else len(M_i) % D
+
     group_len = len(m_i_k)
-    U_i_cap = [m[u] for u in range(num_users) if R[u,i] != 5]
-    r_ui_cap = [R[u, i] for u in U_i_cap]
-    R_i_cap = sum(r_ui_cap)
+    U_i_cap = [R[u,item] for u in range(num_users) if R[u,i] != 5 and R[u,i]!=0]
+    #r_ui_cap = [R[u, i] for u in U_i_cap]
+    R_i_cap = sum(U_i_cap)
     w_i_k = group_len/len(M_i)
     first = (R_i_cap * w_i_k + max_rating * group_len) / (len(U_i_cap) * w_i_k + group_len)
     second = (R_i_cap * w_i_k + max_rating * sum(m_i_k)) / (len(U_i_cap) * w_i_k + sum(m_i_k))
@@ -172,7 +168,7 @@ for m_idx_usr in M_i_Users:
     G_i_vec.append(G_i)
     M_i_k_users.append(split_list(m_idx_usr, G_i))
 
-def get_potential(group_length):
+def get_potential(group_length, item):
 
     if group_length == 1:
         potential_i = np.zeros((2,2))
@@ -180,7 +176,7 @@ def get_potential(group_length):
         for v0 in range(2):
             for v1 in range(2):
                 m_i_k = [v1]
-                rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                 potential_i[v0, v1] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 2:
@@ -190,7 +186,7 @@ def get_potential(group_length):
             for v1 in range(2):
                 for v2 in range(2):
                     m_i_k = [v1, v2]
-                    rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                    rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                     potential_i[v0, v1, v2] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 3:
@@ -201,7 +197,7 @@ def get_potential(group_length):
                 for v2 in range(2):
                     for v3 in range(2):
                         m_i_k = [v1, v2, v3]
-                        rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                        rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                         potential_i[v0, v1, v2, v3] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 4:
@@ -213,7 +209,7 @@ def get_potential(group_length):
                     for v3 in range(2):
                         for v4 in range(2):
                             m_i_k = [v1, v2, v3, v4]
-                            rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                            rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                             potential_i[v0, v1, v2, v3, v4] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 5:
@@ -226,7 +222,7 @@ def get_potential(group_length):
                         for v4 in range(2):
                             for v5 in range(2):
                                 m_i_k = [v1, v2, v3, v4, v5]
-                                rating_bias_i = group_rating_bias(R, m, num_users, num_items, m_i_k)
+                                rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                                 potential_i[v0, v1, v2, v3, v4, v5] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 6:
@@ -240,7 +236,7 @@ def get_potential(group_length):
                             for v5 in range(2):
                                 for v6 in range(2):
                                     m_i_k = [v1, v2, v3, v4, v5, v6]
-                                    rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                    rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                                     potential_i[v0, v1, v2, v3, v4, v5, v6] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
     elif group_length == 7:
@@ -256,7 +252,7 @@ def get_potential(group_length):
                                     for v7 in range(2):
                                         m_i_k = [v1, v2, v3, v4, v5, v6, v7]
                                         # print(m_i_k)
-                                        rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                        rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                                         potential_i[v0, v1, v2, v3, v4, v5, v6, v7] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
     elif group_length == 8:
@@ -273,7 +269,7 @@ def get_potential(group_length):
                                         for v8 in range(2):
                                             m_i_k = [v1, v2, v3, v4, v5, v6, v7, v8]
                                             # print(m_i_k)
-                                            rating_bias_i = group_rating_bias(R,m,num_users,num_items,m_i_k)
+                                            rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
                                             potential_i[v0, v1, v2, v3, v4, v5, v6, v7, v8] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
 
@@ -295,35 +291,35 @@ for item_id, item_node in enumerate(item_nodes):
         if len(user_id_list)==8:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
-                 user_id_list[6], user_id_list[7]], potential=get_potential(8))
+                 user_id_list[6], user_id_list[7]], potential=get_potential(8,item_id))
         elif len(user_id_list)==7:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
-                 user_id_list[6]], potential=get_potential(7))
+                 user_id_list[6]], potential=get_potential(7,item_id))
         elif len(user_id_list)==6:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5]],
-                potential=get_potential(6))
+                potential=get_potential(6,item_id))
         elif len(user_id_list)==5:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4]],
-                potential=get_potential(5))
+                potential=get_potential(5,item_id))
         elif len(user_id_list)==4:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3]],
-                potential=get_potential(4))
+                potential=get_potential(4,item_id))
         elif len(user_id_list)==3:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2]],
-                potential=get_potential(3))
+                potential=get_potential(3,item_id))
         elif len(user_id_list)==2:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1]],
-                potential=get_potential(2))
+                potential=get_potential(2,item_id))
         elif len(user_id_list) == 1:
             Graph.factor(
                 [item_node, user_id_list[0]],
-                potential=get_potential(1))
+                potential=get_potential(1,item_id))
 
 # print('_______________%f seconds__________' % (time.time() - now))
 

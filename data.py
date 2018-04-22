@@ -3,11 +3,11 @@ import sys
 import numpy as np
 import pandas as pd
 
-from SDLib.shillingmodels.averageAttack import AverageAttack
-from SDLib.shillingmodels.bandwagonAttack import BandWagonAttack
-from SDLib.shillingmodels.randomAttack import RandomAttack
-from SDLib.shillingmodels.RR_Attack import RR_Attack
-from SDLib.shillingmodels.hybridAttack import HybridAttack
+# from SDLib.shillingmodels.averageAttack import AverageAttack
+# from SDLib.shillingmodels.bandwagonAttack import BandWagonAttack
+# from SDLib.shillingmodels.randomAttack import RandomAttack
+# from SDLib.shillingmodels.RR_Attack import RR_Attack
+# from SDLib.shillingmodels.hybridAttack import HybridAttack
 
 np.set_printoptions(threshold=np.inf)
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     dirty_ratings_file = 'Data/dirty/MovieLens/small/profiles.txt'
     spam_users_file = 'Data/dirty/MovieLens/small/labels.txt'
 
-    simulate_shilling_attack()
+    # simulate_shilling_attack()
     # movies_dict = build_movies_dict(movies_file)
     # R = generate_matrix(ratings_file, movies_dict)
     # R = generate_dirty_matrix(dirty_ratings_file, movies_dict)
