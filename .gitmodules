@@ -1,6 +1,3 @@
-[submodule "SDLib"]
-	path = SDLib
-	url = https://github.com/Coder-Yu/SDLib
 [submodule "py-factorgraph"]
 	path = py-factorgraph
 	url = https://github.com/mbforbes/py-factorgraph
