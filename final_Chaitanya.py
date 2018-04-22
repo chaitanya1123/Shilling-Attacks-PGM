@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 
 import factorgraph as fg
 
-from data import build_movies_dict, generate_matrix, generate_dirty_matrix, simulate_shilling_attack
+from data import build_movies_dict, generate_100k_matrix, generate_dirty_matrix, simulate_shilling_attack
 import features
 
 # Hyper-parameters
+# Negative if we want less than, positive if we want greater than
+
 alpha_t = -3
 delta_r = 0.35
 beta_1 = -1
@@ -23,28 +25,33 @@ small = 1e-9
 
 D = 8
 
-label_name = 'labels-0.1.txt'
-profile_name = 'profiles-0.1.txt'
-# simulate_shilling_attack(label_name, profile_name)
+print('\nSimulating Shilling Attack...')
+
+label_name = 'labels-0.1-10-50'
+profile_name = 'profiles-0.1-10-50'
+
+simulate_shilling_attack(label_name, profile_name)
 
 print('Generating User-Item Matrix...\n')
 
 # Set paths
-movies_data = './Data/MovieLens/small/movies.csv'
-clean_ratings_data = './Data/MovieLens/small/ratings.csv'
-dirty_ratings_data = './Data/dirty/MovieLens/small/' + profile_name
+# movies_data = './Data/MovieLens/small/movies.csv'
+# ratings_data = './Data/MovieLens/small/ratings.csv'
+# ratings_data = './Data/MovieLens/100k/u.data'
+# dirty_ratings_data = './Data/dirty/MovieLens/small/' + profile_name
+dirty_ratings_data = './Data/dirty/MovieLens/100k/' + profile_name
 
 # User-item rating matrix
-movies_dict = build_movies_dict(movies_data)
+# movies_dict = build_movies_dict(movies_data)
 # R = generate_matrix(clean_ratings_data, movies_dict)
-R = generate_dirty_matrix(dirty_ratings_data, movies_dict)
+# R = generate_100k_matrix(ratings_data)
+R = generate_dirty_matrix(dirty_ratings_data)
 
 # Data Statistics
 num_users = np.shape(R)[0]
 num_items = np.shape(R)[1]
 
 print('Initializing...\n')
-
 # Initialize Factor Graph
 Graph = fg.Graph()
 
@@ -86,7 +93,7 @@ for item_node in item_nodes:
 
 # Factor Helper Functions
 def almost_sigmoid(x, scale, feature, threshold):
-    return 1/(1 + np.exp(np.power(-1,(1-x)) * scale * (feature - threshold)))
+    return 1/(1 + np.exp(np.power(-1, (1-x)) * scale * (feature - threshold)))
 
 print('Building Unary Factors...\n')
 # Init factors and factor_vals
@@ -98,9 +105,7 @@ h = []
 psi_i = features.variance(R, num_users, num_items)
 phi_u = features.mean_var(R, num_users, num_items)
 
-
-# Create factors
-
+# Define Factor Distributions
 def g_dist(user_node, user_id):
     return almost_sigmoid(user_node, beta_1, phi_u[user_id], tau_1)
 
@@ -110,7 +115,6 @@ def h_dist(item_node, item_id):
 
 # Create Factors
 for user_id, user_node in enumerate(user_nodes):
-    g_potential = np.array([g_dist(0, user_id), g_dist(1, user_id)])
     Graph.factor([user_node], potential=np.array([g_dist(0, user_id), g_dist(1, user_id)]))
 
 
@@ -319,7 +323,7 @@ for item_id, item_node in enumerate(item_nodes):
 
 # # Run (loopy) belief propagation (LBP)
 now2 = time.time()
-iters, converged = Graph.lbp(normalize=False)
+iters, converged = Graph.lbp(normalize=True)
 print('LBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('_______________%f seconds__________' % (time.time() - now2))
 
@@ -329,6 +333,7 @@ print('_______________%f seconds__________' % (time.time() - now2))
 #
 #
 # # Print out the final marginals
-Graph.print_rv_marginals([user_rv_list[0], user_rv_list[1],user_rv_list[732],user_rv_list[256],user_rv_list[540]])
+for stuff in user_rv_list:
+    Graph.print_rv_marginals([stuff])
 
 # print('Done dana done done \n')

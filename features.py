@@ -57,22 +57,23 @@ def variance(R, num_users, num_items):
 
 def WDMA(R, num_users, num_items):
     WDMA = []
-    r_i_bar = np.average(R, axis=0)
+
+    r_i_bar = []
+
+    for i in range(num_items):
+        u_i = [R[u, i] for u in range(num_users) if R[u, i] != 0]
+        r_i_bar.append(sum(u_i) / (len(u_i) + 1e-9))
+
     l_i = []
     for i in range(num_items):
-        l_i_val = [R[u,i] for u in range(num_users) if R[u, i]!=0]
+        l_i_val = [R[u, i] for u in range(num_users) if R[u, i] != 0]
         l_i.append(len(l_i_val))
 
-
-    for u in range(1):
-        I_u_subset = [R[u, i] for i in range(num_items) if R[u, i]!=0]
-        print(I_u_subset)
-        avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u,i]!=0]
-        print(avg_u_subset)
-        print(l_i)
-        WDMA_val = [(abs(first - second))/(l_i[u]**2) for first,second in zip(I_u_subset, avg_u_subset)]
-        print(WDMA_val)
-        WDMA.append(sum(WDMA_val)/len(I_u_subset))
+    for u in range(num_users):
+        I_u_subset = [R[u, i] for i in range(num_items) if R[u, i] != 0]
+        avg_u_subset = [r_i_bar[i] for i in range(num_items) if R[u,i] != 0]
+        WDMA_val = [(abs(first - second))/(l_i[u]**2 + 1e-9) for first, second in zip(I_u_subset, avg_u_subset)]
+        WDMA.append(sum(WDMA_val)/(len(I_u_subset) + 1e-9))
 
     return WDMA
 
