@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import factorgraph as fg
+<<<<<<< HEAD:final_Chaitanya.py
 from data import build_movies_dict, generate_matrix
 import features
 
@@ -13,11 +14,21 @@ import features
 movies_data = './Data/MovieLens/small/movies.csv'
 ratings_data = './Data/MovieLens/small/ratings.csv'
 
+=======
+
+from data import build_movies_dict, generate_100k_matrix, generate_dirty_matrix, simulate_shilling_attack
+import features
+
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
 # Hyper-parameters
+# Negative if we want less than, positive if we want greater than
+
 alpha_t = -3
 delta_r = 0.35
-beta_1 = -1
-tau_1 = 12
+beta_1 = 1
+# beta_1 = -1
+# tau_1 = 0.5
+tau_1 = 0.0007
 beta_2 = 1
 tau_2 = 1.5
 min_rating = 0.5
@@ -26,13 +37,27 @@ small = 1e-9
 
 D = 8
 
+print('\nSimulating Shilling Attack...')
 
-# print('Generating User-Item Matrix...\n')
+label_name = 'labels-random-0.1-10-50'
+profile_name = 'profiles-random-0.1-10-50'
+
+# simulate_shilling_attack(label_name, profile_name)
+
+print('Generating User-Item Matrix...\n')
+
+# Set paths
+# movies_data = './Data/MovieLens/small/movies.csv'
+# ratings_data = './Data/MovieLens/small/ratings.csv'
+# ratings_data = './Data/MovieLens/100k/u.data'
+# dirty_ratings_data = './Data/dirty/MovieLens/small/' + profile_name
+dirty_ratings_data = './Data/dirty/MovieLens/100k/' + profile_name
+
 # User-item rating matrix
-movies_dict = build_movies_dict(movies_data)
-R = generate_matrix(ratings_data, movies_dict)
-
-# R = np.random.randint(0, 5, (5, 5))
+# movies_dict = build_movies_dict(movies_data)
+# R = generate_matrix(clean_ratings_data, movies_dict)
+# R = generate_100k_matrix(ratings_data)
+R = generate_dirty_matrix(dirty_ratings_data)
 
 # Data Statistics
 num_users = np.shape(R)[0]
@@ -41,7 +66,6 @@ num_items = np.shape(R)[1]
 print('Initializing...\n')
 # Initialize Factor Graph
 Graph = fg.Graph()
-
 
 # Create nodes : node_list = ['m1', 'm2', 'm3', 't1', 't2', 't3']
 user_nodes = []
@@ -70,22 +94,18 @@ for user_id, user_node in enumerate(user_nodes):
 for item_id, item_node in enumerate(item_nodes):
     item_dict[item_node] = t[item_id]
 
+user_rv_list = []
 # Add Nodes to Factor Graph
 for user_node in user_nodes:
-    Graph.rv(user_node, 2)
-
+    user_rv_list.append(Graph.rv(user_node, 2))
+item_rv_list = []
 for item_node in item_nodes:
-    Graph.rv(item_node, 2)
+   item_rv_list.append(Graph.rv(item_node, 2))
 
 
 # Factor Helper Functions
 def almost_sigmoid(x, scale, feature, threshold):
-    return 1/(1 + np.exp(np.power(-1,(1-x)) * scale * (feature - threshold)))
-
-def binarize(num, num_users):
-    b = bin(num)[2:]
-    op = list('0'*(num_users - len(b)) + b)
-    return op
+    return 1/(1 + np.exp(np.power(-1, (1-x)) * scale * (feature - threshold)))
 
 print('Building Unary Factors...\n')
 # Init factors and factor_vals
@@ -94,31 +114,64 @@ h = []
 
 # Features
 # rating_bias = features.item_rating_bias(R, m, num_users, num_items)
-psi_i = features.variance(R)
+psi_i = features.variance(R, num_users, num_items)
 phi_u = features.mean_var(R, num_users, num_items)
+# phi_u = features.WDMA(R, num_users, num_items)
 
+<<<<<<< HEAD:final_Chaitanya.py
 print(np.average(phi_u))
 
 # plt.hist(psi_i,50)
+=======
+# plt.hist(phi_u, 150)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
 # plt.show()
 #sys.exit(0)
 
 
-# Create factors
-
+# Define Factor Distributions
 def g_dist(user_node, user_id):
     return almost_sigmoid(user_node, beta_1, phi_u[user_id], tau_1)
 
 def h_dist(item_node, item_id):
     return almost_sigmoid(item_node, beta_2, psi_i[item_id], tau_2)
 
+
 # Create Factors
 for user_id, user_node in enumerate(user_nodes):
     Graph.factor([user_node], potential=np.array([g_dist(0, user_id), g_dist(1, user_id)]))
 
+
 for item_id, item_node in enumerate(item_nodes):
     Graph.factor([item_node], potential=np.array([h_dist(0, item_id), h_dist(1, item_id)]))
 
+
+def split_list(list, jump):
+    temp = []
+    for i in range(0, len(list), jump):
+        temp.append(list[i:i+jump])
+    return temp
+
+<<<<<<< HEAD:final_Chaitanya.py
+def group_rating_bias(R, num_users,item, m_i_k):
+
+
+    group_len = len(m_i_k)
+    U_i_cap = [R[u,item] for u in range(num_users) if R[u,i] != 5 and R[u,i]!=0]
+    #r_ui_cap = [R[u, i] for u in U_i_cap]
+=======
+def group_rating_bias(R, num_users, item, m_i_k):
+
+    group_len = len(m_i_k)
+    U_i_cap = [R[u, item] for u in range(num_users) if R[u, item] != 5 and R[u, item] != 0] #Ui and Uicap
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
+    R_i_cap = sum(U_i_cap)
+    w_i_k = group_len/len(M_i)
+    first = (R_i_cap * w_i_k + max_rating * group_len) / (len(U_i_cap) * w_i_k + group_len)
+    second = (R_i_cap * w_i_k + max_rating * sum(m_i_k)) / (len(U_i_cap) * w_i_k + sum(m_i_k))
+
+    rating_bias = np.abs(first - second)
+    return rating_bias
 
 # Calc Mi
 M_i = []
@@ -129,28 +182,6 @@ for i in range(num_items):
     M_i_Users.append(m_i_users)
     M_i.append(m_i)
 
-def split_list(list, jump):
-    temp = []
-    for i in range(0, len(list), jump):
-        temp.append(list[i:i+jump])
-    return temp
-
-def group_rating_bias(R, num_users,item, m_i_k):
-
-
-    group_len = len(m_i_k)
-    U_i_cap = [R[u,item] for u in range(num_users) if R[u,i] != 5 and R[u,i]!=0]
-    #r_ui_cap = [R[u, i] for u in U_i_cap]
-    R_i_cap = sum(U_i_cap)
-    w_i_k = group_len/len(M_i)
-    first = (R_i_cap * w_i_k + max_rating * group_len) / (len(U_i_cap) * w_i_k + group_len)
-    second = (R_i_cap * w_i_k + max_rating * sum(m_i_k)) / (len(U_i_cap) * w_i_k + sum(m_i_k))
-
-    rating_bias = np.abs(first - second)
-    return rating_bias
-
-
-# D = 8
 M_i_k = []
 M_i_k_users = []
 G_i_vec =[]
@@ -176,7 +207,11 @@ def get_potential(group_length, item):
         for v0 in range(2):
             for v1 in range(2):
                 m_i_k = [v1]
+<<<<<<< HEAD:final_Chaitanya.py
                 rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                 potential_i[v0, v1] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 2:
@@ -186,7 +221,11 @@ def get_potential(group_length, item):
             for v1 in range(2):
                 for v2 in range(2):
                     m_i_k = [v1, v2]
+<<<<<<< HEAD:final_Chaitanya.py
                     rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                    rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                     potential_i[v0, v1, v2] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 3:
@@ -197,7 +236,11 @@ def get_potential(group_length, item):
                 for v2 in range(2):
                     for v3 in range(2):
                         m_i_k = [v1, v2, v3]
+<<<<<<< HEAD:final_Chaitanya.py
                         rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                        rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                         potential_i[v0, v1, v2, v3] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 4:
@@ -209,7 +252,11 @@ def get_potential(group_length, item):
                     for v3 in range(2):
                         for v4 in range(2):
                             m_i_k = [v1, v2, v3, v4]
+<<<<<<< HEAD:final_Chaitanya.py
                             rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                            rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                             potential_i[v0, v1, v2, v3, v4] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 5:
@@ -222,7 +269,11 @@ def get_potential(group_length, item):
                         for v4 in range(2):
                             for v5 in range(2):
                                 m_i_k = [v1, v2, v3, v4, v5]
+<<<<<<< HEAD:final_Chaitanya.py
                                 rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                                rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                                 potential_i[v0, v1, v2, v3, v4, v5] = almost_sigmoid(v0, alpha_t, rating_bias_i, delta_r)
 
     elif group_length == 6:
@@ -236,7 +287,11 @@ def get_potential(group_length, item):
                             for v5 in range(2):
                                 for v6 in range(2):
                                     m_i_k = [v1, v2, v3, v4, v5, v6]
+<<<<<<< HEAD:final_Chaitanya.py
                                     rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                                    rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                                     potential_i[v0, v1, v2, v3, v4, v5, v6] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
     elif group_length == 7:
@@ -252,7 +307,11 @@ def get_potential(group_length, item):
                                     for v7 in range(2):
                                         m_i_k = [v1, v2, v3, v4, v5, v6, v7]
                                         # print(m_i_k)
+<<<<<<< HEAD:final_Chaitanya.py
                                         rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                                        rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                                         potential_i[v0, v1, v2, v3, v4, v5, v6, v7] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
     elif group_length == 8:
@@ -269,7 +328,11 @@ def get_potential(group_length, item):
                                         for v8 in range(2):
                                             m_i_k = [v1, v2, v3, v4, v5, v6, v7, v8]
                                             # print(m_i_k)
+<<<<<<< HEAD:final_Chaitanya.py
                                             rating_bias_i = group_rating_bias(R, num_users,item, m_i_k)
+=======
+                                            rating_bias_i = group_rating_bias(R, num_users, item, m_i_k)
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
                                             potential_i[v0, v1, v2, v3, v4, v5, v6, v7, v8] = almost_sigmoid(v0,alpha_t,rating_bias_i,delta_r)
 
 
@@ -280,7 +343,7 @@ user_id_list =[]
 for u in M_i_k_users[0][5]:
     user_id_list.append('m' + str(u))
 
-print('Building Binary Factors')
+print('Building Binary Factors...')
 
 now = time.time()
 for item_id, item_node in enumerate(item_nodes):
@@ -291,6 +354,7 @@ for item_id, item_node in enumerate(item_nodes):
         if len(user_id_list)==8:
             Graph.factor(
                 [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+<<<<<<< HEAD:final_Chaitanya.py
                  user_id_list[6], user_id_list[7]], potential=get_potential(8,item_id))
         elif len(user_id_list)==7:
             Graph.factor(
@@ -320,12 +384,43 @@ for item_id, item_node in enumerate(item_nodes):
             Graph.factor(
                 [item_node, user_id_list[0]],
                 potential=get_potential(1,item_id))
+=======
+                 user_id_list[6], user_id_list[7]], potential=get_potential(8, item_id))
+        elif len(user_id_list)==7:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5],
+                 user_id_list[6]], potential=get_potential(7, item_id))
+        elif len(user_id_list)==6:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4], user_id_list[5]],
+                potential=get_potential(6, item_id))
+        elif len(user_id_list)==5:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3], user_id_list[4]],
+                potential=get_potential(5, item_id))
+        elif len(user_id_list)==4:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2], user_id_list[3]],
+                potential=get_potential(4, item_id))
+        elif len(user_id_list)==3:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1], user_id_list[2]],
+                potential=get_potential(3, item_id))
+        elif len(user_id_list)==2:
+            Graph.factor(
+                [item_node, user_id_list[0], user_id_list[1]],
+                potential=get_potential(2, item_id))
+        elif len(user_id_list) == 1:
+            Graph.factor(
+                [item_node, user_id_list[0]],
+                potential=get_potential(1, item_id))
+>>>>>>> f638f137aa04e98258f81d18bdf2217db1c0d25c:main.py
 
 # print('_______________%f seconds__________' % (time.time() - now))
 
 # # Run (loopy) belief propagation (LBP)
 now2 = time.time()
-iters, converged = Graph.lbp(normalize=False)
+iters, converged = Graph.lbp(normalize=True)
 print('LBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('_______________%f seconds__________' % (time.time() - now2))
 
@@ -335,6 +430,7 @@ print('_______________%f seconds__________' % (time.time() - now2))
 #
 #
 # # Print out the final marginals
-Graph.print_rv_marginals()
+for stuff in user_rv_list:
+    Graph.print_rv_marginals([stuff])
 
 # print('Done dana done done \n')
