@@ -13,7 +13,7 @@ import features
 # Hyper-parameters
 # Negative if we want less than, positive if we want greater than
 
-alpha_t = -3
+alpha_t = 3
 delta_r = 0.35
 beta_1 = -1
 tau_1 = 0.5
@@ -380,11 +380,16 @@ print('\nLBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('Completed in %f second' % (time.time() - now2))
 
 # # Print out the final messages from LBP
-# Graph.print_messages()
+Graph.print_messages()
 
 # Print out the final marginals
 rv_marginals = []
 for stuff in user_rv_list:
     rv_marginals.append(Graph.rv_marginals([stuff]))
+<<<<<<< HEAD
     Graph.print_rv_marginals([stuff])
 # print('Done dana done done \n')
+=======
+    Graph.print_rv_marginals([stuff], normalize=True)
+# print('Done dana done done \n')
+>>>>>>> 493bd01962c1ba7e72f84daadcb6046e1c477ce0
