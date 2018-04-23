@@ -61,7 +61,7 @@ def generate_100k_matrix(input_file):
     return X
 
 def generate_dirty_matrix(input_file):
-    users = 1057
+    users = 1036
     movies = 1682
 
     X = np.zeros(shape=(users, movies))

@@ -4,16 +4,9 @@ import sys
 import numpy as np
 
 # Hyper-parameters
-alpha_t = -3
-delta_r = 0.35
-beta_1 = -1
-tau_1 = 0.5
-beta_2 = 1
-tau_2 = 1.5
-min_rating = 0.5
+min_rating = 1
 max_rating = 5
 small = 1e-9
-
 
 def item_rating_bias(R, m, num_users, num_items):
     rating_bias = []
@@ -41,8 +34,8 @@ def mean_var(R, num_users, num_items):
         I_u_subset = [R[u, i] for i in range(num_items) if R[u,i] !=0 and R[u,i] != 5]
         avg_u_subset = [r_i_bar[j] for j in range(num_items) if R[u,j] !=0 and R[u,j] != 5]
         mean_var_value = [(first - second)**2 for first, second in zip(I_u_subset, avg_u_subset)]
-        mean_var.append(sum(mean_var_value)/(len(mean_var_value) + 1e-9))
 
+        mean_var.append(sum(mean_var_value)/len(mean_var_value))
     return mean_var
 
 def variance(R, num_users, num_items):
@@ -50,8 +43,8 @@ def variance(R, num_users, num_items):
     vari = []
     for i in range(num_items):
         u_i = [R[u, i] for u in range(num_users) if R[u,i] != 0]
-        m = sum(u_i)/(len(u_i) + 1e-9)
-        vari.append(sum([(xi - m) ** 2 for xi in u_i]) / (len(u_i) + 1e-9))
+        m = sum(u_i)/len(u_i)
+        vari.append(sum([(xi - m) ** 2 for xi in u_i]) / len(u_i))
 
     return vari
 
