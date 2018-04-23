@@ -13,7 +13,7 @@ import features
 # Hyper-parameters
 # Negative if we want less than, positive if we want greater than
 
-alpha_t = 3
+alpha_t = -3
 delta_r = 0.35
 beta_1 = -1
 tau_1 = 0.5
@@ -187,10 +187,6 @@ for m_idx_usr in M_i_Users:
         M_i_k_users.append(0)
     else:
         M_i_k_users.append(split_list(m_idx_usr, D))
-
-print(M_i_Users[0])
-print(M_i_k_users[0])
-sys.exit(0)
 
 rating_bias_all = []
 def get_potential(group_length, item):
@@ -380,16 +376,18 @@ print('\nLBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('Completed in %f second' % (time.time() - now2))
 
 # # Print out the final messages from LBP
-Graph.print_messages()
+#Graph.print_messages()
 
 # Print out the final marginals
 rv_marginals = []
 for stuff in user_rv_list:
-    rv_marginals.append(Graph.rv_marginals([stuff]))
-<<<<<<< HEAD
-    Graph.print_rv_marginals([stuff])
-# print('Done dana done done \n')
-=======
+    temp = Graph.rv_marginals([stuff], normalize=True)
+    rv_marginals.append(temp)
     Graph.print_rv_marginals([stuff], normalize=True)
 # print('Done dana done done \n')
->>>>>>> 493bd01962c1ba7e72f84daadcb6046e1c477ce0
+
+count_non_spam = 0
+count_spam = 0
+
+print(rv_marginals[0][0])
+
