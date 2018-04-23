@@ -32,7 +32,7 @@ print('\nSimulating Shilling Attack...\n')
 label_name = 'labels-rand-s10-f5-t5'
 profile_name = 'profiles-rand-s10-f5-t5'
 
-filename = 'rand-s10-f5-t5.txt'
+# filename = 'rand-s10-f5-t5.txt'
 
 # simulate_shilling_attack(label_name, profile_name)
 
@@ -393,49 +393,7 @@ print('Done dana done done \n')
 
 # filename = 'f5-t5.txt'
 
-with open(filename, 'w') as f:
-    for u in range(num_users):
-        f.write(str(rv_marginals[u][0][1]) + '\n')
+# with open(filename, 'w') as f:
+#     for u in range(num_users):
+#         f.write(str(rv_marginals[u][0][1]) + '\n')
 
-# with open(filename, 'r') as f:
-#     for line in f:
-#         #         print(line.split(' ')[3])
-#         first, second = line.split(' ')[1], line.split(' ')[3]
-#         second = second[0:len(second) - 2]
-#         first = float(first)
-#         second = float(second)
-#         print(type(first), type(second))
-
-# sys.exit(0)
-user_predictions = np.zeros((num_users, 1))
-
-# user_ground_truth = user_ground_truth[0:1036]
-# print(len(user_ground_truth))
-
-for u in range(num_users):
-    if rv_marginals[u][0][1][0] > 0.74:
-    # if rv_marginals[u][0][1][1] > 0.85:
-        user_predictions[u] = 1
-    else:
-        user_predictions[u] = 0
-
-pre = metrics.precision_score(user_ground_truth, user_predictions)
-rkl = metrics.recall_score(user_ground_truth, user_predictions)
-
-print(pre, rkl)
-
-print(metrics.classification_report(user_ground_truth, user_predictions))
-
-# precision, recall, _ = precision_recall_curve(user_ground_truth, user_predictions)
-# fpr, tpr, _ = metrics.roc_curve(user_ground_truth, user_predictions)
-#
-# plt.step(fpr, tpr, color='b', alpha=0.2,
-#          where='post')
-# # plt.fill_between(recall, precision, step='post', alpha=0.2,
-# #                  color='b')
-#
-# plt.xlabel('FPR')
-# plt.ylabel('TPR')
-# plt.ylim([0.0, 1.05])
-# plt.xlim([0.0, 1.0])
-# plt.show()
