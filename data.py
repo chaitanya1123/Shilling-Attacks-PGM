@@ -11,11 +11,15 @@ import pandas as pd
 
 np.set_printoptions(threshold=np.inf)
 
-
+label_name = 'labels-avg-5'
+profile_name = 'profiles-avg-5'
 
 def simulate_shilling_attack(label_name, profile_name):
-    # attack = AverageAttack('./config/config-100k.conf')
-    attack = RandomAttack('./config/config-100k.conf')
+    attack = AverageAttack('./config/config-100k.conf')
+    # attack = RandomAttack('./config/config-100k.conf')
+    # attack = BandWagonAttack('./config/config-100k.conf')
+    # attack = HybridAttack('./config/config-100k.conf')
+    # attack = RR_Attack('./config/config-100k.conf')
     attack.insertSpam()
     # attack.farmLink()
     attack.generateLabels(label_name)
@@ -57,7 +61,7 @@ def generate_100k_matrix(input_file):
     return X
 
 def generate_dirty_matrix(input_file):
-    users = 1057
+    users = 1036
     movies = 1682
 
     X = np.zeros(shape=(users, movies))
@@ -70,7 +74,7 @@ def generate_dirty_matrix(input_file):
 
 def generate_user_spam_list(input_file):
 
-    spam_users = np.zeros((738, 1))
+    spam_users = np.zeros((1057, 1))
     with open(input_file, 'r') as f:
         for i,line in enumerate(f):
             user, is_spam = line.split(' ')
@@ -79,14 +83,15 @@ def generate_user_spam_list(input_file):
 
 if __name__ == '__main__':
     
-    movies_file = 'Data/MovieLens/small/movies.csv'
-    # ratings_file = 'Data/MovieLens/small/ratings.csv'
-    ratings_file = 'Data/MovieLens/100k/u.data'
-    # dirty_ratings_file = 'Data/dirty/MovieLens/small/' + profile_name
-    # spam_users_file = 'Data/dirty/MovieLens/small/' + label_name
+    # Specify data paths
 
-    # simulate_shilling_attack()
+    #movies_file = 'Data/MovieLens/small/movies.csv'
+    ratings_file = 'Data/MovieLens/100k/u.data'
+    dirty_ratings_file = 'Data/dirty/MovieLens/100k/' + profile_name
+    spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
+
+    simulate_shilling_attack(label_name, profile_name)
     # movies_dict = build_movies_dict(movies_file)
     # R = generate_100k_matrix(ratings_file)
-    # R = generate_dirty_matrix(dirty_ratings_file, movies_dict)
-    # spam_users = generate_user_spam_list(spam_users_file)
+    R = generate_dirty_matrix(dirty_ratings_file)
+    spam_users = generate_user_spam_list(spam_users_file)
