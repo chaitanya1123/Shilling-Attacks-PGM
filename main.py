@@ -29,10 +29,10 @@ D = 8
 
 print('\nSimulating Shilling Attack...\n')
 
-label_name = 'labels-avg-f5-t0'
-profile_name = 'profiles-avg-f5-t0'
+label_name = 'labels-avg-s5-f5-t1'
+profile_name = 'profiles-avg-s5-f5-t1'
 
-filename = 'f5-t0.txt'
+filename = 's5-f5-t1.txt'
 
 # simulate_shilling_attack(label_name, profile_name)
 
@@ -412,7 +412,8 @@ user_ground_truth = generate_user_spam_list(spam_users_file)
 for u in range(num_users):
     if rv_marginals[u][0][1][0] > 0.74:
         user_predictions[u] = 1
-    else: user_predictions[u] = 0
+    else:
+        user_predictions[u] = 0
 
 pre = metrics.precision_score(user_ground_truth, user_predictions)
 rkl = metrics.recall_score(user_ground_truth, user_predictions)
