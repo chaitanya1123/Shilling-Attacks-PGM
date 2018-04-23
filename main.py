@@ -29,10 +29,10 @@ D = 8
 
 print('\nSimulating Shilling Attack...\n')
 
-label_name = 'labels-avg-f5-t0'
-profile_name = 'profiles-avg-f5-t0'
+label_name = 'labels-avg-f10-t10'
+profile_name = 'profiles-avg-f10-t10'
 
-filename = 'f5-t0.txt'
+filename = 'f10-t10.txt'
 
 # simulate_shilling_attack(label_name, profile_name)
 
@@ -169,7 +169,6 @@ for m_idx in M_i:
     else:
         G_i = int(abs(l) / D) + 1
 
-    print(G_i)
     if G_i == 0:
         M_i_k.append(0)
     else:
@@ -381,27 +380,13 @@ print('\nLBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('Completed in %f second' % (time.time() - now2))
 
 # # Print out the final messages from LBP
-<<<<<<< HEAD
 #Graph.print_messages()
-=======
-# Graph.print_messages()
->>>>>>> 6e472464771f4d84b4717e6094bf2f5341b79c48
+
 
 # Print out the final marginals
 rv_marginals = []
 for stuff in user_rv_list:
-<<<<<<< HEAD
-    temp = Graph.rv_marginals([stuff], normalize=True)
-    rv_marginals.append(temp)
-    Graph.print_rv_marginals([stuff], normalize=True)
-# print('Done dana done done \n')
 
-count_non_spam = 0
-count_spam = 0
-
-print(rv_marginals[0][0])
-
-=======
     rv_marginals.append(Graph.rv_marginals([stuff], normalize=True))
     Graph.print_rv_marginals([stuff], normalize=True)
 print('Done dana done done \n')
@@ -453,4 +438,4 @@ print(metrics.classification_report(user_ground_truth, user_predictions))
 # plt.ylim([0.0, 1.05])
 # plt.xlim([0.0, 1.0])
 # plt.show()
->>>>>>> 6e472464771f4d84b4717e6094bf2f5341b79c48
+
