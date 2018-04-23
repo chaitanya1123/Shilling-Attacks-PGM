@@ -11,8 +11,22 @@ from SDLib.shillingmodels.hybridAttack import HybridAttack
 
 np.set_printoptions(threshold=np.inf)
 
-label_name = 'labels-avg-5'
-profile_name = 'profiles-avg-5'
+# label_name = 'labels-avg-f10-t3'
+# label_name = 'labels-avg-f10-t4'
+# label_name = 'labels-avg-f10-t5'
+# label_name = 'labels-avg-f10-t6'
+# label_name = 'labels-avg-f10-t7'
+# label_name = 'labels-avg-f10-t8'
+# label_name = 'labels-avg-f10-t9'
+label_name = 'labels-avg-f10-t10'
+# profile_name = 'profiles-avg-f10-t3'
+# profile_name = 'profiles-avg-f10-t4'
+# profile_name = 'profiles-avg-f10-t5'
+# profile_name = 'profiles-avg-f10-t6'
+# profile_name = 'profiles-avg-f10-t7'
+# profile_name = 'profiles-avg-f10-t8'
+# profile_name = 'profiles-avg-f10-t9'
+profile_name = 'profiles-avg-f10-t10'
 
 def simulate_shilling_attack(label_name, profile_name):
     attack = AverageAttack('./config/config-100k.conf')
@@ -74,7 +88,7 @@ def generate_dirty_matrix(input_file):
 
 def generate_user_spam_list(input_file):
 
-    spam_users = np.zeros((1057, 1))
+    spam_users = np.zeros((1036, 1))
     with open(input_file, 'r') as f:
         for i,line in enumerate(f):
             user, is_spam = line.split(' ')
@@ -87,11 +101,11 @@ if __name__ == '__main__':
 
     #movies_file = 'Data/MovieLens/small/movies.csv'
     ratings_file = 'Data/MovieLens/100k/u.data'
-    dirty_ratings_file = 'Data/dirty/MovieLens/100k/' + profile_name
-    spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
+    # dirty_ratings_file = 'Data/dirty/MovieLens/100k/' + profile_name
+    # spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
 
     simulate_shilling_attack(label_name, profile_name)
     # movies_dict = build_movies_dict(movies_file)
     # R = generate_100k_matrix(ratings_file)
-    R = generate_dirty_matrix(dirty_ratings_file)
-    spam_users = generate_user_spam_list(spam_users_file)
+    # R = generate_dirty_matrix(dirty_ratings_file)
+    # spam_users = generate_user_spam_list(spam_users_file)

@@ -4,16 +4,18 @@ import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import metrics
 
 import factorgraph as fg
 
-from data import build_movies_dict, generate_100k_matrix, generate_dirty_matrix, simulate_shilling_attack, generate_matrix_from_csv
+from data import build_movies_dict, generate_100k_matrix, generate_dirty_matrix, simulate_shilling_attack, \
+    generate_matrix_from_csv, generate_user_spam_list
 import features
 
 # Hyper-parameters
 # Negative if we want less than, positive if we want greater than
 
-alpha_t = 3
+alpha_t = -3
 delta_r = 0.35
 beta_1 = -1
 tau_1 = 0.5
@@ -39,6 +41,7 @@ print('Generating User-Item Matrix...\n')
 # ratings_data = './Data/MovieLens/small/ratings.csv'
 # ratings_data = './Data/MovieLens/100k/u.data'
 dirty_ratings_data = './Data/dirty/MovieLens/100k/' + profile_name
+spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
 
 # User-item rating matrix
 # movies_dict = build_movies_dict(movies_data)
@@ -373,11 +376,59 @@ print('\nLBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('Completed in %f second' % (time.time() - now2))
 
 # # Print out the final messages from LBP
-Graph.print_messages()
+# Graph.print_messages()
 
 # Print out the final marginals
 rv_marginals = []
 for stuff in user_rv_list:
-    rv_marginals.append(Graph.rv_marginals([stuff]))
+    rv_marginals.append(Graph.rv_marginals([stuff], normalize=True))
     Graph.print_rv_marginals([stuff], normalize=True)
-# print('Done dana done done \n')
+print('Done dana done done \n')
+
+filename = 'f5-t5.txt'
+
+with open(filename, 'w') as f:
+    for u in range(num_users):
+        f.write(str(rv_marginals[u][0][1]) + '\n')
+
+# with open(filename, 'r') as f:
+#     for line in f:
+#         #         print(line.split(' ')[3])
+#         first, second = line.split(' ')[1], line.split(' ')[3]
+#         second = second[0:len(second) - 2]
+#         first = float(first)
+#         second = float(second)
+#         print(type(first), type(second))
+
+# sys.exit(0)
+user_predictions = np.zeros((num_users, 1))
+
+user_ground_truth = generate_user_spam_list(spam_users_file)
+# user_ground_truth = user_ground_truth[0:1036]
+# print(len(user_ground_truth))
+
+for u in range(num_users):
+    if rv_marginals[u][0][1][0] > 0.74:
+        user_predictions[u] = 1
+    else: user_predictions[u] = 0
+
+pre = metrics.precision_score(user_ground_truth, user_predictions)
+rkl = metrics.recall_score(user_ground_truth, user_predictions)
+
+print(pre, rkl)
+
+print(metrics.classification_report(user_ground_truth, user_predictions))
+
+# precision, recall, _ = precision_recall_curve(user_ground_truth, user_predictions)
+fpr, tpr, _ = metrics.roc_curve(user_ground_truth, user_predictions)
+
+plt.step(fpr, tpr, color='b', alpha=0.2,
+         where='post')
+# plt.fill_between(recall, precision, step='post', alpha=0.2,
+#                  color='b')
+
+plt.xlabel('FPR')
+plt.ylabel('TPR')
+plt.ylim([0.0, 1.05])
+plt.xlim([0.0, 1.0])
+plt.show()
