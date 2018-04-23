@@ -29,8 +29,10 @@ D = 8
 
 print('\nSimulating Shilling Attack...\n')
 
-label_name = 'labels-avg-5'
-profile_name = 'profiles-avg-5'
+label_name = 'labels-avg-f5-t0'
+profile_name = 'profiles-avg-f5-t0'
+
+filename = 'f5-t0.txt'
 
 # simulate_shilling_attack(label_name, profile_name)
 
@@ -385,7 +387,7 @@ for stuff in user_rv_list:
     Graph.print_rv_marginals([stuff], normalize=True)
 print('Done dana done done \n')
 
-filename = 'f5-t5.txt'
+# filename = 'f5-t5.txt'
 
 with open(filename, 'w') as f:
     for u in range(num_users):
@@ -420,15 +422,15 @@ print(pre, rkl)
 print(metrics.classification_report(user_ground_truth, user_predictions))
 
 # precision, recall, _ = precision_recall_curve(user_ground_truth, user_predictions)
-fpr, tpr, _ = metrics.roc_curve(user_ground_truth, user_predictions)
-
-plt.step(fpr, tpr, color='b', alpha=0.2,
-         where='post')
-# plt.fill_between(recall, precision, step='post', alpha=0.2,
-#                  color='b')
-
-plt.xlabel('FPR')
-plt.ylabel('TPR')
-plt.ylim([0.0, 1.05])
-plt.xlim([0.0, 1.0])
-plt.show()
+# fpr, tpr, _ = metrics.roc_curve(user_ground_truth, user_predictions)
+#
+# plt.step(fpr, tpr, color='b', alpha=0.2,
+#          where='post')
+# # plt.fill_between(recall, precision, step='post', alpha=0.2,
+# #                  color='b')
+#
+# plt.xlabel('FPR')
+# plt.ylabel('TPR')
+# plt.ylim([0.0, 1.05])
+# plt.xlim([0.0, 1.0])
+# plt.show()
