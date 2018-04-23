@@ -29,10 +29,17 @@ D = 8
 
 print('\nSimulating Shilling Attack...\n')
 
+<<<<<<< HEAD
 label_name = 'labels-avg-f10-t10'
 profile_name = 'profiles-avg-f10-t10'
 
 filename = 'f10-t10.txt'
+=======
+label_name = 'labels-rand-s10-f5-t5'
+profile_name = 'profiles-rand-s10-f5-t5'
+
+filename = 'rand-s10-f5-t5.txt'
+>>>>>>> 970720fd9c7f9c293228421e11455e1425230aeb
 
 # simulate_shilling_attack(label_name, profile_name)
 
@@ -49,7 +56,9 @@ spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
 # movies_dict = build_movies_dict(movies_data)
 # R = generate_matrix_from_csv(ratings_data, movies_dict)
 # R = generate_100k_matrix(ratings_data)
+
 R = generate_dirty_matrix(dirty_ratings_data)
+user_ground_truth = generate_user_spam_list(spam_users_file)
 
 # Data Statistics
 num_users = np.shape(R)[0]
@@ -110,8 +119,9 @@ psi_i = features.variance(R, num_users, num_items)
 phi_u = features.mean_var(R, num_users, num_items)
 # phi_u = features.WDMA(R, num_users, num_items)
 
-# plt.hist(phi_u, 150)
-# plt.show()
+plt.hist(phi_u, 150)
+plt.hist(psi_i, 150)
+plt.show()
 # sys.exit(0)
 
 
@@ -368,8 +378,9 @@ for item_id, item_node in enumerate(item_nodes):
 
 print('Completed in %f seconds' % (time.time() - now))
 
-# plt.hist(rating_bias_all, 50)
-# plt.show()
+plt.hist(rating_bias_all, 150)
+plt.show()
+sys.exit(0)
 # # Run (loopy) belief propagation (LBP)
 print('\nRunning LBP...\n')
 now2 = time.time()
@@ -409,14 +420,15 @@ with open(filename, 'w') as f:
 # sys.exit(0)
 user_predictions = np.zeros((num_users, 1))
 
-user_ground_truth = generate_user_spam_list(spam_users_file)
 # user_ground_truth = user_ground_truth[0:1036]
 # print(len(user_ground_truth))
 
 for u in range(num_users):
     if rv_marginals[u][0][1][0] > 0.74:
+    # if rv_marginals[u][0][1][1] > 0.85:
         user_predictions[u] = 1
-    else: user_predictions[u] = 0
+    else:
+        user_predictions[u] = 0
 
 pre = metrics.precision_score(user_ground_truth, user_predictions)
 rkl = metrics.recall_score(user_ground_truth, user_predictions)
