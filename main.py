@@ -373,11 +373,11 @@ print('\nLBP ran for %d iterations. Converged = %r' % (iters, converged))
 print('Completed in %f second' % (time.time() - now2))
 
 # # Print out the final messages from LBP
-# Graph.print_messages()
+Graph.print_messages()
 
 # Print out the final marginals
-rv_marginals = []
+# rv_marginals = []
 for stuff in user_rv_list:
-    rv_marginals.append(Graph.rv_marginals([stuff]))
-    Graph.print_rv_marginals([stuff])
+    # rv_marginals.append(Graph.rv_marginals([stuff]))
+    Graph.print_rv_marginals([stuff], normalize=True)
 # print('Done dana done done \n')
