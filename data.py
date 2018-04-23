@@ -11,42 +11,42 @@ from SDLib.shillingmodels.hybridAttack import HybridAttack
 
 np.set_printoptions(threshold=np.inf)
 
-# label_name = 'labels-avg-s5-f5-t0'
-# profile_name = 'profiles-avg-s5-f5-t0'
+# label_name = 'labels-rand-s10-f5-t0'
+# profile_name = 'profiles-rand-s10-f5-t0'
+
+# label_name = 'labels-rand-s10-f5-t1'
+# profile_name = 'profiles-rand-s10-f5-t1'
 #
-# label_name = 'labels-avg-s5-f5-t1'
-# profile_name = 'profiles-avg-s5-f5-t1'
+# label_name = 'labels-rand-s10-f5-t2'
+# profile_name = 'profiles-rand-s10-f5-t2'
+#
+# label_name = 'labels-rand-s10-f5-t3'
+# profile_name = 'profiles-rand-s10-f5-t3'
+#
+# label_name = 'labels-rand-s10-f5-t4'
+# profile_name = 'profiles-rand-s10-f5-t4'
+#
+# label_name = 'labels-rand-s10-f5-t5'
+# profile_name = 'profiles-rand-s10-f5-t5'
+#
+# label_name = 'labels-rand-s10-f5-t6'
+# profile_name = 'profiles-rand-s10-f5-t6'
+#
+# label_name = 'labels-rand-s10-f5-t7'
+# profile_name = 'profiles-rand-s10-f5-t7'
 
-# label_name = 'labels-avg-s5-f5-t2'
-# profile_name = 'profiles-avg-s5-f5-t2'
+# label_name = 'labels-rand-s10-f5-t8'
+# profile_name = 'profiles-rand-s10-f5-t8'
 
-# label_name = 'labels-avg-s5-f5-t3'
-# profile_name = 'profiles-avg-s5-f5-t3'
+# label_name = 'labels-rand-s10-f5-t9'
+# profile_name = 'profiles-rand-s10-f5-t9'
 
-# label_name = 'labels-avg-s5-f5-t4'
-# profile_name = 'profiles-avg-s5-f5-t4'
-
-# label_name = 'labels-avg-s5-f5-t5'
-# profile_name = 'profiles-avg-s5-f5-t5'
-
-# label_name = 'labels-avg-s5-f5-t6'
-# profile_name = 'profiles-avg-s5-f5-t6'
-
-# label_name = 'labels-avg-s5-f5-t7'
-# profile_name = 'profiles-avg-s5-f5-t7'
-
-# label_name = 'labels-avg-s5-f5-t8'
-# profile_name = 'profiles-avg-s5-f5-t8'
-
-# label_name = 'labels-avg-s5-f5-t9'
-# profile_name = 'profiles-avg-s5-f5-t9'
-
-label_name = 'labels-avg-s5-f5-t10'
-profile_name = 'profiles-avg-s5-f5-t10'
+# label_name = 'labels-rand-s10-f5-t10'
+# profile_name = 'profiles-rand-s10-f5-t10'
 
 def simulate_shilling_attack(label_name, profile_name):
-    attack = AverageAttack('./config/config-100k.conf')
-    # attack = RandomAttack('./config/config-100k.conf')
+    # attack = AverageAttack('./config/config-100k.conf')
+    attack = RandomAttack('./config/config-100k.conf')
     # attack = BandWagonAttack('./config/config-100k.conf')
     # attack = HybridAttack('./config/config-100k.conf')
     # attack = RR_Attack('./config/config-100k.conf')
@@ -91,13 +91,14 @@ def generate_100k_matrix(input_file):
     return X
 
 def generate_dirty_matrix(input_file):
-    # users = 1036
-    users = 989
+    users = 1036
+    # users = 989
     movies = 1682
 
     X = np.zeros(shape=(users, movies))
     with open(input_file, 'r') as f:
         for i, line in enumerate(f):
+            # print(line)
             user, movie_id, rating= line.split(' ')
             # id = movies_dict[int(movie_id)]
             X[int(user)-1, int(movie_id)-1] = float(rating)
@@ -106,14 +107,14 @@ def generate_dirty_matrix(input_file):
 def generate_user_spam_list(input_file):
 
     # 10%
-    # spam_users = np.zeros((1036, 1))
+    spam_users = np.zeros((1036, 1))
     # 5%
-    spam_users = np.zeros((989, 1))
+    # spam_users = np.zeros((989, 1))
     with open(input_file, 'r') as f:
         for i,line in enumerate(f):
             user, is_spam = line.split(' ')
             spam_users[int(user)-1] = int(is_spam)
-            print(i)
+            # print(i)
     return spam_users
 
 if __name__ == '__main__':
