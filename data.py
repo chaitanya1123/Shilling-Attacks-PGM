@@ -11,38 +11,9 @@ from SDLib.shillingmodels.hybridAttack import HybridAttack
 
 np.set_printoptions(threshold=np.inf)
 
-# label_name = 'labels-rand-s10-f5-t0'
-# profile_name = 'profiles-rand-s10-f5-t0'
 
-# label_name = 'labels-rand-s10-f5-t1'
-# profile_name = 'profiles-rand-s10-f5-t1'
-#
-# label_name = 'labels-rand-s10-f5-t2'
-# profile_name = 'profiles-rand-s10-f5-t2'
-#
-# label_name = 'labels-rand-s10-f5-t3'
-# profile_name = 'profiles-rand-s10-f5-t3'
-#
-# label_name = 'labels-rand-s10-f5-t4'
-# profile_name = 'profiles-rand-s10-f5-t4'
-#
-# label_name = 'labels-rand-s10-f5-t5'
-# profile_name = 'profiles-rand-s10-f5-t5'
-#
-# label_name = 'labels-rand-s10-f5-t6'
-# profile_name = 'profiles-rand-s10-f5-t6'
-#
-# label_name = 'labels-rand-s10-f5-t7'
-# profile_name = 'profiles-rand-s10-f5-t7'
-
-# label_name = 'labels-rand-s10-f5-t8'
-# profile_name = 'profiles-rand-s10-f5-t8'
-
-# label_name = 'labels-rand-s10-f5-t9'
-# profile_name = 'profiles-rand-s10-f5-t9'
-
-# label_name = 'labels-rand-s10-f5-t10'
-# profile_name = 'profiles-rand-s10-f5-t10'
+label_name = 'labels-rand-s10-f5-t10'
+profile_name = 'profiles-rand-s10-f5-t10'
 
 def simulate_shilling_attack(label_name, profile_name):
     # attack = AverageAttack('./config/config-100k.conf')

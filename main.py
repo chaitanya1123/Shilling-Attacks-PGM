@@ -14,7 +14,7 @@ import features
 
 # Hyper-parameters
 # Negative if we want less than, positive if we want greater than
-
+# Needs tuning for each attack profile. Current combination is for average attack.
 alpha_t = -3
 delta_r = 0.35
 beta_1 = -1
@@ -29,26 +29,26 @@ D = 8
 
 print('\nSimulating Shilling Attack...\n')
 
-label_name = 'labels-rand-s10-f5-t5'
-profile_name = 'profiles-rand-s10-f5-t5'
+label_name = 'labels-s10-f5-t5'
+profile_name = 'profiles-s10-f5-t5'
 
-# filename = 'rand-s10-f5-t5.txt'
+filename = 'rand-s10-f5-t5.txt'
 
-# simulate_shilling_attack(label_name, profile_name)
+simulate_shilling_attack(label_name, profile_name)
 
 print('Generating User-Item Matrix...\n')
 
 # Set paths
 # movies_data = './Data/MovieLens/small/movies.csv'
 # ratings_data = './Data/MovieLens/small/ratings.csv'
-# ratings_data = './Data/MovieLens/100k/u.data'
+ratings_data = './Data/MovieLens/100k/u.data'
 dirty_ratings_data = './Data/dirty/MovieLens/100k/' + profile_name
 spam_users_file = 'Data/dirty/MovieLens/100k/' + label_name
 
 # User-item rating matrix
 # movies_dict = build_movies_dict(movies_data)
 # R = generate_matrix_from_csv(ratings_data, movies_dict)
-# R = generate_100k_matrix(ratings_data)
+R_clean = generate_100k_matrix(ratings_data)
 
 R = generate_dirty_matrix(dirty_ratings_data)
 user_ground_truth = generate_user_spam_list(spam_users_file)
@@ -112,9 +112,9 @@ psi_i = features.variance(R, num_users, num_items)
 phi_u = features.mean_var(R, num_users, num_items)
 # phi_u = features.WDMA(R, num_users, num_items)
 
-plt.hist(phi_u, 150)
-plt.hist(psi_i, 150)
-plt.show()
+#plt.hist(phi_u, 150)
+#plt.hist(psi_i, 150)
+#plt.show()
 # sys.exit(0)
 
 
@@ -134,7 +134,7 @@ for user_id, user_node in enumerate(user_nodes):
 for item_id, item_node in enumerate(item_nodes):
     Graph.factor([item_node], potential=np.array([h_dist(0, item_id), h_dist(1, item_id)]))
 
-
+#Methods for grouping and calc group rating bias
 def split_list(list, jump):
     temp = []
     for i in range(0, len(list), jump):
@@ -369,9 +369,9 @@ for item_id, item_node in enumerate(item_nodes):
 
 print('Completed in %f seconds' % (time.time() - now))
 
-plt.hist(rating_bias_all, 150)
-plt.show()
-sys.exit(0)
+#plt.hist(rating_bias_all, 150)
+#plt.show()
+#sys.exit(0)
 # # Run (loopy) belief propagation (LBP)
 print('\nRunning LBP...\n')
 now2 = time.time()
@@ -388,12 +388,10 @@ print('Completed in %f second' % (time.time() - now2))
 rv_marginals = []
 for stuff in user_rv_list:
     rv_marginals.append(Graph.rv_marginals([stuff], normalize=True))
-    Graph.print_rv_marginals([stuff], normalize=True)
 print('Done dana done done \n')
 
-# filename = 'f5-t5.txt'
 
-# with open(filename, 'w') as f:
-#     for u in range(num_users):
-#         f.write(str(rv_marginals[u][0][1]) + '\n')
+#with open(filename, 'w') as f:
+#    for u in range(num_users):
+#        f.write(str(rv_marginals[u][0][1]) + '\n')
 
